@@ -1,0 +1,48 @@
+.goals-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.add-goal-card {
+    border: 2px dashed var(--card-border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 250px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.add-goal-card:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.add-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.add-goal-card:hover .add-icon {
+    background: var(--primary);
+    color: white;
+}

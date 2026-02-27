@@ -1,0 +1,67 @@
+.budget-standing {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    height: 100%;
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.widget-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    color: var(--text-secondary);
+}
+
+.standing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.standing-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.standing-item.warning {
+    border-left: 3px solid var(--danger);
+}
+
+.standing-item.warning svg {
+    color: var(--danger);
+}
+
+.standing-item.success {
+    border-left: 3px solid var(--success);
+}
+
+.standing-item.success svg {
+    color: var(--success);
+}
+
+.standing-info span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: block;
+}
+
+.standing-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}

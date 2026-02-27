@@ -1,0 +1,63 @@
+.upcoming-payments {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    height: 100%;
+}
+
+.payments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.payment-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.payment-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.payment-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+}
+
+.payment-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.pay-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.pay-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.pay-amount {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.no-payments {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    padding: 1rem 0;
+}
