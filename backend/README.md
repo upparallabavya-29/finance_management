@@ -1,34 +1,48 @@
-# Personal Finance Backend
+# Personal Finance Dashboard - Backend
 
-This is the backend for the Personal Finance Dashboard, built with Node.js, Express, and Supabase.
+## Overview
+This is the Node.js and Express RESTful API backend for the Personal Finance Dashboard. It follows the MVC architecture pattern to serve data securely to the frontend client from the Supabase PostgreSQL database.
 
 ## Tech Stack
-- **Node.js**
-- **Express.js**
-- **Supabase** (Database)
-- **Cors** (Middleware)
-- **Morgan** (Logging)
-- **Dotenv** (Environment Variables)
-
-## Database Schema
-- **users**: id (UUID), email, created_at
-- **transactions**: id (UUID), user_id, amount, category, date, description, type
-- **budgets**: id (UUID), user_id, category, limit_amount, spent_amount, period
-- **goals**: id (UUID), user_id, name, target_amount, current_amount, deadline
+- Node.js & Express.js (MVC)
+- Supabase (PostgreSQL Database & Auth)
+- JSON Web Tokens (JWT) for route protection
+- CORS & dotenv for configuration
 
 ## API Documentation
-- `GET /api/transactions` - Get all transactions
-- `POST /api/transactions` - Create a new transaction
-- `GET /api/budgets` - Get all budgets
-- `POST /api/budgets` - Create a new budget
-- `GET /api/goals` - Get all goals
-- `POST /api/goals` - Create a new goal
+The API provides several CRUD endpoints protected by JWT validation middleware:
+- `GET /api/transactions` - Fetch all transactions
+- `GET /api/budgets` - Fetch active budgets
+- `GET /api/debts` - Fetch debts and loans
+- `GET /api/investments` - Fetch robust portfolio details
+
+*Note: You must pass a Bearer token in the `Authorization` header to access protected routes.*
+
+## Database Schema
+The database is fully normalized in Supabase utilizing Row Level Security (RLS) to ensure tenant privacy. Tables include:
+- `users`, `categories`, `transactions`, `budgets`, `savings_goals`, `debts`, `investments`.
 
 ## Installation Steps
-1. Navigate to the `backend` directory.
-2. Run `npm install`.
-3. Create a `.env` file with `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
-4. Run `npm run dev` to start the development server.
+1. Clone this repository (or navigate to the backend folder).
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file referencing your Supabase instance:
+   ```env
+   PORT=5000
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-## Deployment Link
-[Backend on Render](https://render.com) (Placeholder)
+## Deployment Guide
+This Node.js backend is designed to be deployed to Render.
+1. Push your code to GitHub.
+2. Link your repository to Render as a "Web Service".
+3. Set your Build Command to `npm install`.
+4. Set your Start Command to `npm start`.
+5. Populate the Render Environment Variables tab with your `.env` contents.

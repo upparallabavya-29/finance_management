@@ -1,16 +1,11 @@
-import express from 'express'
-import {
-    getTransactions,
-    createTransaction,
-    updateTransaction,
-    deleteTransaction
-} from '../controllers/transactionController.js'
+import express from 'express';
+import { getTransactions } from '../controllers/transactionController.js';
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', getTransactions)
-router.post('/', createTransaction)
-router.put('/:id', updateTransaction)
-router.delete('/:id', deleteTransaction)
+// @route   GET /api/transactions
+// @desc    Get all transactions
+// @access  Public (for now, will be protected with auth middleware later)
+router.get('/', getTransactions);
 
-export default router
+export default router;

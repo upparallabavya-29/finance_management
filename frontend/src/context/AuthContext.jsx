@@ -8,13 +8,11 @@ export const AuthProvider = ({ children }) => {
 
     // For this project, we'll use a mock user or handle Supabase auth logic here
     useEffect(() => {
-        // Check for existing session
-        const mockUser = { id: 'mock-uuid', email: 'user@example.com' }
-        setUser(mockUser)
+        // App starts in unauthenticated state
         setLoading(false)
     }, [])
 
-    const login = async (email, password) => {
+    const login = async (email) => {
         // Supabase login logic
         const mockUser = { id: 'mock-uuid', email }
         setUser(mockUser)
@@ -31,4 +29,5 @@ export const AuthProvider = ({ children }) => {
     )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext)
