@@ -21,7 +21,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 // Summary Card Component
-const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHide }) => {
+const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHide, onViewDetails, onEdit }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -44,15 +44,24 @@ const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHi
                     {/* Dropdown Menu */}
                     {isOpen && (
                         <div className="absolute right-0 mt-2 w-40 glass-card rounded-xl py-1 z-20 animate-in fade-in zoom-in-95 duration-200">
-                            <button className="w-full text-left px-4 py-2 text-[13px] font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                            <button
+                                onClick={() => onViewDetails && onViewDetails(title)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                className="w-full text-left px-4 py-2 text-[13px] font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                            >
                                 View Details
                             </button>
-                            <button className="w-full text-left px-4 py-2 text-[13px] font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                            <button
+                                onClick={() => onEdit && onEdit(title)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                className="w-full text-left px-4 py-2 text-[13px] font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                            >
                                 Edit Widget
                             </button>
                             <div className="h-px bg-white/5 my-1"></div>
                             <button
                                 onClick={() => onHide && onHide(title)}
+                                onMouseDown={(e) => e.preventDefault()}
                                 className="w-full text-left px-4 py-2 text-[13px] font-medium text-rose-400 hover:bg-rose-500/10 transition-colors"
                             >
                                 Hide
@@ -61,9 +70,9 @@ const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHi
                     )}
                 </div>
             </div>
-            <div className="space-y-1">
-                <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase">{title}</p>
-                <h3 className="text-2xl font-bold text-white tracking-tight">${amount}</h3>
+            <div className="space-y-1 z-10 relative">
+                <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 tracking-wider uppercase">{title}</p>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">${amount}</h3>
                 <div className="flex items-center gap-1.5 pt-1">
                     <span className={`text-[13px] font-bold ${change.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {change}
@@ -80,8 +89,8 @@ const ChartWrapper = ({ title, children, subtitle, activeFilter = 'M', onFilterC
     <div className="glass-card rounded-[24px] p-6 h-full flex flex-col">
         <div className="flex justify-between items-center mb-6">
             <div>
-                <h3 className="text-lg font-bold text-white">{title}</h3>
-                {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+                {subtitle && <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">{subtitle}</p>}
             </div>
             {onFilterChange && (
                 <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
@@ -90,8 +99,8 @@ const ChartWrapper = ({ title, children, subtitle, activeFilter = 'M', onFilterC
                             key={filter}
                             onClick={() => onFilterChange(filter)}
                             className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-colors ${activeFilter === filter
-                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
-                                : 'text-gray-400 hover:text-white border border-transparent'
+                                ? 'bg-blue-100 text-blue-600 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/20'
+                                : 'text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-white border border-transparent'
                                 }`}
                         >
                             {filter}
@@ -159,16 +168,26 @@ const Dashboard = () => {
         alert(`Hidden ${title} (Implement state management for hiding)`);
     };
 
+    const handleViewDetails = (title) => {
+        if (title.includes('Income') || title.includes('Expenses')) navigate('/transactions');
+        else if (title.includes('Savings')) navigate('/goals');
+        else navigate('/investments');
+    };
+
+    const handleEditWidget = (title) => {
+        alert(`Opening edit settings for ${title}`);
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Page Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Financial Overview</h1>
-                    <p className="text-gray-400 text-sm mt-1">Manage your wealth and track your financial growth.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Financial Overview</h1>
+                    <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">Manage your wealth and track your financial growth.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="glass px-4 py-2 rounded-xl text-sm font-bold text-gray-300 hover:text-white flex items-center gap-2 transition-all">
+                    <button className="glass px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white flex items-center gap-2 transition-all">
                         <Calendar className="w-4 h-4" />
                         Custom Date
                     </button>
@@ -184,7 +203,13 @@ const Dashboard = () => {
             {/* Top Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {summaries.map((s, idx) => (
-                    <SummaryCard key={idx} {...s} onHide={handleHideCard} />
+                    <SummaryCard
+                        key={idx}
+                        {...s}
+                        onHide={handleHideCard}
+                        onViewDetails={handleViewDetails}
+                        onEdit={handleEditWidget}
+                    />
                 ))}
             </div>
 
@@ -240,7 +265,9 @@ const Dashboard = () => {
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
-                                        <Tooltip />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                                        />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
@@ -248,7 +275,7 @@ const Dashboard = () => {
                                 {categoryData.map((c, i) => (
                                     <div key={i} className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }}></div>
-                                        <span className="text-[11px] text-gray-400 font-medium">{c.name} ({c.value}%)</span>
+                                        <span className="text-[11px] text-slate-500 dark:text-gray-400 font-medium">{c.name} ({c.value}%)</span>
                                     </div>
                                 ))}
                             </div>
@@ -262,10 +289,10 @@ const Dashboard = () => {
                 {/* Budget Usage & Savings */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     {/* Bar Chart Budget Usage */}
-                    <div className="glass-card rounded-[24px] p-6 h-full flex flex-col cursor-pointer hover:bg-white/[0.04] transition-colors" onClick={() => navigate('/budgets')}>
+                    <div className="glass-card rounded-[24px] p-6 h-full flex flex-col cursor-pointer hover:bg-slate-200/50 dark:hover:bg-white/[0.04] transition-colors" onClick={() => navigate('/budgets')}>
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white">Budget Usage</h3>
-                            <button className="p-1 text-gray-400 hover:text-white transition-colors">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Budget Usage</h3>
+                            <button className="p-1 text-slate-400 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white transition-colors">
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         </div>
@@ -276,11 +303,11 @@ const Dashboard = () => {
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#4b5563', fontSize: 10 }} />
                                     <YAxis hide />
                                     <Tooltip
-                                        cursor={{ fill: '#ffffff05' }}
-                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '10px' }}
+                                        cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                                        contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '10px', color: '#fff' }}
                                     />
                                     <Bar dataKey="current" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-                                    <Bar dataKey="total" fill="#ffffff05" radius={[4, 4, 0, 0]} barSize={20} />
+                                    <Bar dataKey="total" fill="rgba(148, 163, 184, 0.2)" radius={[4, 4, 0, 0]} barSize={20} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -289,10 +316,10 @@ const Dashboard = () => {
                     {/* Savings Goals */}
                     <div className="glass-card rounded-[24px] p-6">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white">Savings Goals</h3>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Savings Goals</h3>
                             <button
                                 onClick={() => navigate('/goals')}
-                                className="text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider bg-blue-500/10 px-3 py-1.5 rounded-lg"
+                                className="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors uppercase tracking-wider bg-blue-100 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg"
                             >
                                 Add Goal
                             </button>
@@ -305,11 +332,11 @@ const Dashboard = () => {
                             ].map((goal, idx) => (
                                 <div key={idx} className="space-y-2 cursor-pointer group" onClick={() => navigate('/goals')}>
                                     <div className="flex justify-between text-[13px] font-medium">
-                                        <span className="text-gray-200 group-hover:text-blue-400 transition-colors">{goal.name}</span>
-                                        <span className="text-gray-400">${goal.current.toLocaleString()} / <span className="text-gray-600">${goal.target.toLocaleString()}</span></span>
+                                        <span className="text-slate-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{goal.name}</span>
+                                        <span className="text-slate-500 dark:text-gray-400">${goal.current.toLocaleString()} / <span className="text-slate-800 dark:text-gray-600">${goal.target.toLocaleString()}</span></span>
                                     </div>
-                                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div className={`h-full ${goal.color} rounded-full transition-all duration-1000 group-hover:brightness-125`} style={{ width: `${goal.p}%` }}></div>
+                                    <div className="h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+                                        <div className={`h-full ${goal.color} rounded-full transition-all duration-1000 group-hover:brightness-110 dark:group-hover:brightness-125`} style={{ width: `${goal.p}%` }}></div>
                                     </div>
                                     <div className="flex justify-end">
                                         <span className={`text-[11px] font-bold ${goal.color.replace('bg-', 'text-')}`}>{goal.p}% Reach</span>
@@ -323,11 +350,11 @@ const Dashboard = () => {
                 {/* Recent Transactions Table */}
                 <div className="lg:col-span-8">
                     <div className="glass-card rounded-[24px] h-full overflow-hidden flex flex-col">
-                        <div className="p-6 border-b border-white/5 flex justify-between items-center text-left">
-                            <h3 className="text-lg font-bold text-white">Recent Transactions</h3>
+                        <div className="p-6 border-b border-slate-200 dark:border-white/5 flex justify-between items-center text-left">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
                             <button
                                 onClick={() => navigate('/transactions')}
-                                className="text-[12px] font-bold text-gray-400 hover:text-blue-400 flex items-center gap-1.5 transition-colors group px-3 py-1.5 rounded-lg hover:bg-white/5"
+                                className="text-[12px] font-bold text-slate-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 flex items-center gap-1.5 transition-colors group px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
                             >
                                 View All
                                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
@@ -336,31 +363,31 @@ const Dashboard = () => {
                         <div className="overflow-x-auto flex-1">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="text-left">
-                                        <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Transaction</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Category</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Date</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Amount</th>
+                                    <tr className="text-left bg-slate-50/50 dark:bg-transparent">
+                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">Transaction</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">Category</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">Date</th>
+                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest text-right border-b border-slate-200 dark:border-white/5">Amount</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/5">
+                                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                                     {transactions.map((t) => (
-                                        <tr key={t.id} onClick={() => navigate('/transactions')} className="group hover:bg-white/[0.04] transition-colors cursor-pointer text-left">
+                                        <tr key={t.id} onClick={() => navigate('/transactions')} className="group hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:border-white/20 group-hover:text-blue-400 transition-colors">
+                                                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-gray-400 group-hover:border-blue-200 dark:group-hover:border-white/20 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                                         <Wallet className="w-4 h-4" />
                                                     </div>
-                                                    <span className="text-[14px] font-bold text-gray-200 group-hover:text-white transition-colors">{t.desc}</span>
+                                                    <span className="text-[14px] font-bold text-slate-700 dark:text-gray-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{t.desc}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[11px] font-bold text-gray-400">{t.cat}</span>
+                                                <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-full text-[11px] font-bold text-slate-500 dark:text-gray-400">{t.cat}</span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-[13px] font-medium text-gray-500">{t.date}</span>
+                                                <span className="text-[13px] font-medium text-slate-500 dark:text-gray-500">{t.date}</span>
                                             </td>
-                                            <td className={`px-6 py-4 text-right text-[14px] font-bold ${t.amount > 0 ? 'text-emerald-400 font-bold' : 'text-gray-200'}`}>
+                                            <td className={`px-6 py-4 text-right text-[14px] font-bold ${t.amount > 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-900 dark:text-gray-200'}`}>
                                                 {t.amount > 0 ? `+ $${t.amount.toFixed(2)}` : `- $${Math.abs(t.amount).toFixed(2)}`}
                                             </td>
                                         </tr>

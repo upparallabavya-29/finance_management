@@ -9,9 +9,33 @@ const Register = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    const validatePassword = (pass) => {
+        const rules = [
+            { test: /.{8,}/, message: 'Password must be at least 8 characters long.' },
+            { test: /[A-Z]/, message: 'Password must contain at least one uppercase letter (A-Z).' },
+            { test: /[a-z]/, message: 'Password must contain at least one lowercase letter (a-z).' },
+            { test: /[0-9]/, message: 'Password must contain at least one number (0-9).' },
+            { test: /[@$!%*?&]/, message: 'Password must contain at least one special character (@$!%*?&).' },
+        ];
+
+        for (let rule of rules) {
+            if (!rule.test.test(pass)) {
+                return rule.message;
+            }
+        }
+        return null; // Valid
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            setError(passwordError);
+            return;
+        }
+
         try {
             // Assume registration logic here via an Auth Provider/API
             console.log('Registering:', email);

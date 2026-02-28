@@ -22,8 +22,13 @@ export const AuthProvider = ({ children }) => {
         setUser(null)
     }
 
+    const resetPassword = async (email) => {
+        // Simulate API call for password reset
+        return new Promise((resolve) => setTimeout(resolve, 1500));
+    }
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, resetPassword }}>
             {children}
         </AuthContext.Provider>
     )

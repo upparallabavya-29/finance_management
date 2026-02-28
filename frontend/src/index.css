@@ -32,29 +32,41 @@
   }
 
   body {
-    @apply bg-[#020617] text-foreground font-sans antialiased;
+    @apply bg-slate-50 text-slate-900 font-sans antialiased dark:bg-[#020617] dark:text-foreground;
     background-image:
-      radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-      radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.1) 0, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(225, 39%, 30%, 0.05) 0, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(253, 16%, 95%, 1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225, 39%, 95%, 0.8) 0, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(225, 39%, 95%, 0.5) 0, transparent 50%);
     min-height: 100vh;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-image:
+        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.1) 0, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(225, 39%, 30%, 0.05) 0, transparent 50%);
+    }
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-slate-900/40 backdrop-blur-md border border-white/10 shadow-xl;
+    @apply bg-white/60 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-xl;
   }
 
   .glass-card {
-    background-color: rgb(51 65 85 / 0.1);
-    backdrop-filter: blur(24px);
-    border: 1px solid rgb(255 255 255 / 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+    @apply bg-slate-100/50 dark:bg-slate-800/10 backdrop-blur-2xl border border-slate-200/50 dark:border-white/5 shadow-sm;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .glass-card {
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+    }
   }
 
   .glass-sidebar {
-    @apply bg-slate-950/80 backdrop-blur-2xl border-r border-white/5;
+    @apply bg-white/80 dark:bg-slate-950/80 backdrop-blur-2xl border-r border-slate-200 dark:border-white/5;
   }
 
   .text-glow-green {

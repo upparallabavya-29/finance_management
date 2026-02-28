@@ -8,6 +8,7 @@ import Investments from './pages/Investments'
 import Reports from './pages/Reports'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
 import './index.css'
 
 import Layout from './components/layout/Layout'
@@ -29,6 +30,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Protected routes wrapped in layout and guard */}
           <Route path="*" element={
