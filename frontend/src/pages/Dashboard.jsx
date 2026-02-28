@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     AreaChart, Area,
     XAxis, YAxis,
@@ -20,43 +21,84 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 // Summary Card Component
-const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor }) => (
-    <div className="glass-card rounded-[24px] p-6 relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300">
-        <div className={`absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-20 transition-opacity group-hover:opacity-40`} style={{ backgroundColor: glowColor }}></div>
-        <div className="flex justify-between items-start mb-4">
-            <div className={`p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors ${color}`}>
-                <Icon className="w-5 h-5" />
+const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHide }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="glass-card rounded-[24px] p-6 relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300">
+            <div className={`absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-20 transition-opacity group-hover:opacity-40`} style={{ backgroundColor: glowColor }}></div>
+            <div className="flex justify-between items-start mb-4">
+                <div className={`p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors ${color}`}>
+                    <Icon className="w-5 h-5" />
+                </div>
+
+                <div className="relative">
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+                        className="p-1 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors focus:outline-none"
+                    >
+                        <MoreVertical className="w-4 h-4" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isOpen && (
+                        <div className="absolute right-0 mt-2 w-40 glass-card rounded-xl py-1 z-20 animate-in fade-in zoom-in-95 duration-200">
+                            <button className="w-full text-left px-4 py-2 text-[13px] font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                                View Details
+                            </button>
+                            <button className="w-full text-left px-4 py-2 text-[13px] font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors">
+                                Edit Widget
+                            </button>
+                            <div className="h-px bg-white/5 my-1"></div>
+                            <button
+                                onClick={() => onHide && onHide(title)}
+                                className="w-full text-left px-4 py-2 text-[13px] font-medium text-rose-400 hover:bg-rose-500/10 transition-colors"
+                            >
+                                Hide
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-            <button className="p-1 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors">
-                <MoreVertical className="w-4 h-4" />
-            </button>
-        </div>
-        <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase">{title}</p>
-            <h3 className="text-2xl font-bold text-white tracking-tight">${amount}</h3>
-            <div className="flex items-center gap-1.5 pt-1">
-                <span className={`text-[13px] font-bold ${change.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {change}
-                </span>
-                <span className="text-[11px] text-gray-500 font-medium">from last month</span>
+            <div className="space-y-1">
+                <p className="text-xs font-semibold text-gray-400 tracking-wider uppercase">{title}</p>
+                <h3 className="text-2xl font-bold text-white tracking-tight">${amount}</h3>
+                <div className="flex items-center gap-1.5 pt-1">
+                    <span className={`text-[13px] font-bold ${change.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {change}
+                    </span>
+                    <span className="text-[11px] text-gray-500 font-medium">from last month</span>
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 // Chart Container Component
-const ChartWrapper = ({ title, children, subtitle }) => (
+const ChartWrapper = ({ title, children, subtitle, activeFilter = 'M', onFilterChange }) => (
     <div className="glass-card rounded-[24px] p-6 h-full flex flex-col">
         <div className="flex justify-between items-center mb-6">
             <div>
                 <h3 className="text-lg font-bold text-white">{title}</h3>
                 {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
             </div>
-            <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
-                <button className="px-2.5 py-1 text-[11px] font-bold text-gray-400 hover:text-white transition-colors">W</button>
-                <button className="px-2.5 py-1 text-[11px] font-bold bg-blue-500/20 text-blue-400 rounded-md border border-blue-500/20">M</button>
-                <button className="px-2.5 py-1 text-[11px] font-bold text-gray-400 hover:text-white transition-colors">Y</button>
-            </div>
+            {onFilterChange && (
+                <div className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/5">
+                    {['W', 'M', 'Y'].map(filter => (
+                        <button
+                            key={filter}
+                            onClick={() => onFilterChange(filter)}
+                            className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-colors ${activeFilter === filter
+                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                                : 'text-gray-400 hover:text-white border border-transparent'
+                                }`}
+                        >
+                            {filter}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
         <div className="flex-1 min-h-[220px]">
             {children}
@@ -66,6 +108,11 @@ const ChartWrapper = ({ title, children, subtitle }) => (
 
 const Dashboard = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // Chart Filter States
+    const [trendFilter, setTrendFilter] = useState('M');
+    const [categoryFilter, setCategoryFilter] = useState('M');
 
     // Summary Data
     const summaries = [
@@ -108,6 +155,10 @@ const Dashboard = () => {
         { id: 4, desc: 'Uber Ride', cat: 'Transport', date: '26 Feb 2026', amount: -32.50, status: 'Completed' },
     ];
 
+    const handleHideCard = (title) => {
+        alert(`Hidden ${title} (Implement state management for hiding)`);
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Page Header */}
@@ -121,7 +172,10 @@ const Dashboard = () => {
                         <Calendar className="w-4 h-4" />
                         Custom Date
                     </button>
-                    <button className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-xl text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2">
+                    <button
+                        onClick={() => navigate('/transactions')}
+                        className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-xl text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2"
+                    >
                         + New Entry
                     </button>
                 </div>
@@ -130,7 +184,7 @@ const Dashboard = () => {
             {/* Top Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {summaries.map((s, idx) => (
-                    <SummaryCard key={idx} {...s} />
+                    <SummaryCard key={idx} {...s} onHide={handleHideCard} />
                 ))}
             </div>
 
@@ -138,7 +192,12 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Main Trend Chart */}
                 <div className="lg:col-span-8">
-                    <ChartWrapper title="Income vs Expenses" subtitle="Cash flow analysis for the last 6 months">
+                    <ChartWrapper
+                        title="Income vs Expenses"
+                        subtitle="Cash flow analysis"
+                        activeFilter={trendFilter}
+                        onFilterChange={setTrendFilter}
+                    >
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={trendData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
                                 <defs>
@@ -167,7 +226,11 @@ const Dashboard = () => {
 
                 {/* Pie Chart Card */}
                 <div className="lg:col-span-4">
-                    <ChartWrapper title="Expenses by Category">
+                    <ChartWrapper
+                        title="Expenses by Category"
+                        activeFilter={categoryFilter}
+                        onFilterChange={setCategoryFilter}
+                    >
                         <div className="flex flex-col h-full">
                             <div className="flex-1 flex justify-center items-center">
                                 <ResponsiveContainer width="100%" height={220}>
@@ -199,9 +262,14 @@ const Dashboard = () => {
                 {/* Budget Usage & Savings */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     {/* Bar Chart Budget Usage */}
-                    <div className="glass-card rounded-[24px] p-6">
-                        <h3 className="text-lg font-bold text-white mb-6">Budget Usage</h3>
-                        <div className="h-48 w-full">
+                    <div className="glass-card rounded-[24px] p-6 h-full flex flex-col cursor-pointer hover:bg-white/[0.04] transition-colors" onClick={() => navigate('/budgets')}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-white">Budget Usage</h3>
+                            <button className="p-1 text-gray-400 hover:text-white transition-colors">
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <div className="flex-1 min-h-[160px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={budgetData}>
                                     <CartesianGrid vertical={false} stroke="#ffffff03" />
@@ -222,7 +290,12 @@ const Dashboard = () => {
                     <div className="glass-card rounded-[24px] p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-bold text-white">Savings Goals</h3>
-                            <button className="text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider">Add Goal</button>
+                            <button
+                                onClick={() => navigate('/goals')}
+                                className="text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider bg-blue-500/10 px-3 py-1.5 rounded-lg"
+                            >
+                                Add Goal
+                            </button>
                         </div>
                         <div className="space-y-6">
                             {[
@@ -230,13 +303,13 @@ const Dashboard = () => {
                                 { name: 'Vacation', current: 2250, target: 5000, p: 45, color: 'bg-emerald-500' },
                                 { name: 'New Car', current: 12000, target: 40000, p: 30, color: 'bg-purple-500' },
                             ].map((goal, idx) => (
-                                <div key={idx} className="space-y-2">
+                                <div key={idx} className="space-y-2 cursor-pointer group" onClick={() => navigate('/goals')}>
                                     <div className="flex justify-between text-[13px] font-medium">
-                                        <span className="text-gray-200">{goal.name}</span>
+                                        <span className="text-gray-200 group-hover:text-blue-400 transition-colors">{goal.name}</span>
                                         <span className="text-gray-400">${goal.current.toLocaleString()} / <span className="text-gray-600">${goal.target.toLocaleString()}</span></span>
                                     </div>
                                     <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                        <div className={`h-full ${goal.color} rounded-full transition-all duration-1000`} style={{ width: `${goal.p}%` }}></div>
+                                        <div className={`h-full ${goal.color} rounded-full transition-all duration-1000 group-hover:brightness-125`} style={{ width: `${goal.p}%` }}></div>
                                     </div>
                                     <div className="flex justify-end">
                                         <span className={`text-[11px] font-bold ${goal.color.replace('bg-', 'text-')}`}>{goal.p}% Reach</span>
@@ -252,8 +325,11 @@ const Dashboard = () => {
                     <div className="glass-card rounded-[24px] h-full overflow-hidden flex flex-col">
                         <div className="p-6 border-b border-white/5 flex justify-between items-center text-left">
                             <h3 className="text-lg font-bold text-white">Recent Transactions</h3>
-                            <button className="text-[12px] font-bold text-gray-400 hover:text-blue-400 flex items-center gap-1.5 transition-colors group">
-                                View All Transactions
+                            <button
+                                onClick={() => navigate('/transactions')}
+                                className="text-[12px] font-bold text-gray-400 hover:text-blue-400 flex items-center gap-1.5 transition-colors group px-3 py-1.5 rounded-lg hover:bg-white/5"
+                            >
+                                View All
                                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                             </button>
                         </div>
@@ -269,13 +345,13 @@ const Dashboard = () => {
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {transactions.map((t) => (
-                                        <tr key={t.id} className="group hover:bg-white/[0.02] transition-colors cursor-pointer text-left">
+                                        <tr key={t.id} onClick={() => navigate('/transactions')} className="group hover:bg-white/[0.04] transition-colors cursor-pointer text-left">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:border-white/20 transition-colors">
+                                                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 group-hover:border-white/20 group-hover:text-blue-400 transition-colors">
                                                         <Wallet className="w-4 h-4" />
                                                     </div>
-                                                    <span className="text-[14px] font-bold text-gray-200">{t.desc}</span>
+                                                    <span className="text-[14px] font-bold text-gray-200 group-hover:text-white transition-colors">{t.desc}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">

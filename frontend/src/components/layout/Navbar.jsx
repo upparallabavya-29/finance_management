@@ -19,7 +19,7 @@ const Navbar = () => {
     };
 
     return (
-        <div className="h-20 flex items-center justify-between px-8 bg-transparent border-b border-white/5 backdrop-blur-sm z-30">
+        <div className="relative z-50 h-20 flex items-center justify-between px-8 bg-transparent border-b border-white/5 backdrop-blur-sm">
             {/* Search Bar */}
             <div className="flex-1 max-w-md">
                 <div className="relative group">
