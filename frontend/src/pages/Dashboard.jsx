@@ -347,56 +347,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Recent Transactions Table */}
-                <div className="lg:col-span-8">
-                    <div className="glass-card rounded-[24px] h-full overflow-hidden flex flex-col">
-                        <div className="p-6 border-b border-slate-200 dark:border-white/5 flex justify-between items-center text-left">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
-                            <button
-                                onClick={() => navigate('/transactions')}
-                                className="text-[12px] font-bold text-slate-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 flex items-center gap-1.5 transition-colors group px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
-                            >
-                                View All
-                                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                            </button>
-                        </div>
-                        <div className="overflow-x-auto flex-1">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="text-left bg-slate-50/50 dark:bg-transparent">
-                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">Transaction</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">Category</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest border-b border-slate-200 dark:border-white/5">Date</th>
-                                        <th className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-gray-500 uppercase tracking-widest text-right border-b border-slate-200 dark:border-white/5">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                                    {transactions.map((t) => (
-                                        <tr key={t.id} onClick={() => navigate('/transactions')} className="group hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-colors cursor-pointer text-left">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-gray-400 group-hover:border-blue-200 dark:group-hover:border-white/20 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                        <Wallet className="w-4 h-4" />
-                                                    </div>
-                                                    <span className="text-[14px] font-bold text-slate-700 dark:text-gray-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{t.desc}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-full text-[11px] font-bold text-slate-500 dark:text-gray-400">{t.cat}</span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-[13px] font-medium text-slate-500 dark:text-gray-500">{t.date}</span>
-                                            </td>
-                                            <td className={`px-6 py-4 text-right text-[14px] font-bold ${t.amount > 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-900 dark:text-gray-200'}`}>
-                                                {t.amount > 0 ? `+ $${t.amount.toFixed(2)}` : `- $${Math.abs(t.amount).toFixed(2)}`}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                {/* Recent Transactions Table REMOVED per user request */}
             </div>
         </div>
     );

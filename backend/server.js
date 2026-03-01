@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import transactionRoutes from './routes/transactionRoutes.js';
 import debtRoutes from './routes/debtRoutes.js';
 import investmentRoutes from './routes/investmentRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/debts', debtRoutes);
 app.use('/api/investments', investmentRoutes);

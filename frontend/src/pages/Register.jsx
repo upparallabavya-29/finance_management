@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
     const [firstName, setFirstName] = useState('');
@@ -7,6 +8,8 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const { register } = useAuth();
     const navigate = useNavigate();
 
     const validatePassword = (pass) => {
@@ -36,12 +39,14 @@ const Register = () => {
             return;
         }
 
+        setIsLoading(true);
         try {
-            // Assume registration logic here via an Auth Provider/API
-            console.log('Registering:', email);
+            await register({ firstName, lastName, email, password });
             navigate('/login');
         } catch (err) {
-            setError(err.message || 'Failed to create an account');
+            setError(err.response?.data?.message || err.message || 'Failed to create an account');
+        } finally {
+            setIsLoading(false);
         }
     };
 

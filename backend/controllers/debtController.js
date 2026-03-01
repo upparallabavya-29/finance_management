@@ -1,7 +1,5 @@
 import supabase from '../config/supabaseClient.js';
 
-// @desc    Get all debts
-// @route   GET /api/debts
 export const getDebts = async (req, res) => {
     try {
         const { data: debts, error } = await supabase

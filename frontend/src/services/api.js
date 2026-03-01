@@ -9,6 +9,22 @@ const api = axios.create({
     }
 })
 
+// Attach token to requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export const authService = {
+    register: (data) => api.post('/auth/register', data),
+    login: (data) => api.post('/auth/login', data),
+    logout: () => api.post('/auth/logout'),
+    getMe: () => api.get('/auth/me')
+}
+
 export const transactionService = {
     getTransactions: () => api.get('/transactions'),
     createTransaction: (data) => api.post('/transactions', data),
