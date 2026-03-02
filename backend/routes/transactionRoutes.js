@@ -1,11 +1,17 @@
 import express from 'express';
-import { getTransactions } from '../controllers/transactionController.js';
+import { getTransactions, createTransaction, updateTransaction, deleteTransaction } from '../controllers/transactionController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// @route   GET /api/transactions
-// @desc    Get all transactions
-// @access  Public (for now, will be protected with auth middleware later)
-router.get('/', getTransactions);
+router.use(protect);
+
+router.route('/')
+    .get(getTransactions)
+    .post(createTransaction);
+
+router.route('/:id')
+    .put(updateTransaction)
+    .delete(deleteTransaction);
 
 export default router;

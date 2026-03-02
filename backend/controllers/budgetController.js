@@ -4,7 +4,12 @@ export const getBudgets = async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('budgets')
-            .select('*')
+            .select(`
+                *,
+                categories (
+                    name
+                )
+            `);
 
         if (error) throw error
 
@@ -22,16 +27,55 @@ export const createBudget = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing required fields' })
         }
 
+        // 1. Get or create category
+        let categoryId;
+        const { data: existingCat, error: catSearchErr } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('user_id', user_id)
+            .eq('name', category)
+            .single();
+
+        if (existingCat) {
+            categoryId = existingCat.id;
+        } else {
+            const { data: newCat, error: catInsertErr } = await supabase
+                .from('categories')
+                .insert([{ user_id, name: category, type: 'expense' }])
+                .select()
+                .single();
+            if (catInsertErr) throw catInsertErr;
+            categoryId = newCat.id;
+        }
+
+        // 2. Calculate dates from period
+        const startDate = new Date();
+        const endDate = new Date();
+        if (period === 'weekly') endDate.setDate(startDate.getDate() + 7);
+        else if (period === 'monthly') endDate.setMonth(startDate.getMonth() + 1);
+        else if (period === 'yearly') endDate.setFullYear(startDate.getFullYear() + 1);
+
+        // 3. Create the budget record using correct schema fields
         const { data, error } = await supabase
             .from('budgets')
-            .insert([{ category, limit_amount, period, user_id, spent_amount: 0 }])
-            .select()
+            .insert([{
+                user_id,
+                category_id: categoryId,
+                amount: limit_amount,
+                start_date: startDate.toISOString().split('T')[0],
+                end_date: endDate.toISOString().split('T')[0]
+            }])
+            .select('*, categories(*)');
 
-        if (error) throw error
+        if (error) {
+            console.error('Supabase Error:', error);
+            throw error;
+        }
 
         res.status(201).json({ success: true, data: data[0] })
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message })
+        console.error('Create Budget Error:', error);
+        res.status(500).json({ success: false, message: error.message || 'Failed to create budget' })
     }
 }
 

@@ -183,7 +183,9 @@ const Dashboard = () => {
             {/* Page Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Financial Overview</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                        Welcome, {user?.firstName ? `${user.firstName} ${user.lastName}` : (user?.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'User')}
+                    </h1>
                     <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">Manage your wealth and track your financial growth.</p>
                 </div>
                 <div className="flex gap-3">
