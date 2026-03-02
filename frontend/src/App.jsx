@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
@@ -6,6 +7,7 @@ import Budgets from './pages/Budgets'
 import Debts from './pages/Debts'
 import Investments from './pages/Investments'
 import Reports from './pages/Reports'
+import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
@@ -23,6 +25,21 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem('theme') || 'System';
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'System') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else if (theme === 'Dark Mode') {
+      root.classList.add('dark');
+    } else {
+      root.classList.add('light');
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
@@ -43,6 +60,7 @@ function App() {
                   <Route path="/debts" element={<Debts />} />
                   <Route path="/investments" element={<Investments />} />
                   <Route path="/reports" element={<Reports />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

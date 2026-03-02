@@ -33,7 +33,7 @@ const Sidebar = () => {
         { name: 'Debts', href: '/debts', icon: CircleDollarSign },
         { name: 'Investments', href: '/investments', icon: TrendingUp },
         { name: 'Reports', href: '/reports', icon: FileBarChart },
-        { name: 'Settings', href: '#', icon: Settings },
+        { name: 'Settings', href: '/settings', icon: Settings },
     ];
 
     return (

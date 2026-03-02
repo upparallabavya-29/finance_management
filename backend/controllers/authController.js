@@ -15,6 +15,12 @@ export const registerUser = async (req, res) => {
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                data: {
+                    first_name: firstName,
+                    last_name: lastName
+                }
+            }
         });
 
         if (authError) {
@@ -23,23 +29,10 @@ export const registerUser = async (req, res) => {
 
         const userId = authData.user.id;
 
-        // 2. Insert user profile into public.users table
-        const { error: profileError } = await supabase
-            .from('users')
-            .insert([
-                {
-                    id: userId,
-                    email,
-                    first_name: firstName,
-                    last_name: lastName,
-                }
-            ]);
-
-        if (profileError) {
-            // Rollback auth user creation if profile insert fails? (Complex in Supabase without admin rights, but a good practice to log or handle)
-            console.error("Profile creation error:", profileError);
-            return res.status(500).json({ success: false, message: 'User registered, but failed to create profile.' });
-        }
+        // The Supabase database has a trigger `on_auth_user_created` that automatically 
+        // inserts the user profile into the `public.users` table upon signup.
+        // We just need to wait a moment to ensure it's written before proceeding, 
+        // or we can just rely on the data provided in the request for the response.
 
         res.status(201).json({
             success: true,
