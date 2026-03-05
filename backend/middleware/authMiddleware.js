@@ -1,4 +1,4 @@
-import supabase from '../config/supabaseClient.js';
+import { supabaseAuth } from '../config/supabase.js';
 
 // JWT Middleware to protect routes ensuring user is authorized via Supabase Auth
 export const protect = async (req, res, next) => {
@@ -9,7 +9,7 @@ export const protect = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
 
             // Verify the token with Supabase
-            const { data: { user }, error } = await supabase.auth.getUser(token);
+            const { data: { user }, error } = await supabaseAuth.auth.getUser(token);
 
             if (error || !user) {
                 return res.status(401).json({ success: false, message: 'Not authorized, token failed' });

@@ -4,21 +4,25 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const supabaseUrl = process.env.SUPABASE_URL
-// Use the Service Role Key since the backend acts as a trusted admin
-// and handles auth verification independently via the 'protect' middleware
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const anonKey = process.env.SUPABASE_ANON_KEY
 
 let supabaseInstance = null
+let supabaseAuthInstance = null
 
-if (!supabaseUrl || !supabaseKey) {
-    console.warn('⚠️ WARNING: Missing SUPABASE_URL or SUPABASE_KEY in backend/.env')
+if (!supabaseUrl || !anonKey) {
+    console.warn('⚠️ WARNING: Missing SUPABASE_URL or SUPABASE_ANON_KEY in backend/.env')
     console.warn('The application will start, but database operations will fail until credentials are provided.')
 } else {
     try {
-        supabaseInstance = createClient(supabaseUrl, supabaseKey)
+        // Use Service Role Key for backend data ops (bypasses RLS). If missing, gracefully fall back to Anon.
+        supabaseInstance = createClient(supabaseUrl, serviceKey || anonKey)
+        // Use Anon Key strictly for authenticating users (signIn, signUp)
+        supabaseAuthInstance = createClient(supabaseUrl, anonKey)
     } catch (error) {
         console.error('Failed to initialize Supabase client:', error.message)
     }
 }
 
 export const supabase = supabaseInstance
+export const supabaseAuth = supabaseAuthInstance

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     AreaChart, Area,
@@ -19,6 +19,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { transactionService, budgetService } from '../services/api';
 
 // Summary Card Component
 const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHide, onViewDetails, onEdit }) => {
@@ -123,49 +124,79 @@ const Dashboard = () => {
     const [trendFilter, setTrendFilter] = useState('M');
     const [categoryFilter, setCategoryFilter] = useState('M');
 
-    // Summary Data
+    const [txs, setTxs] = useState([]);
+    const [budgets, setBudgets] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [txRes, budgetRes] = await Promise.all([
+                    transactionService.getTransactions().catch(() => ({ data: { data: [] } })),
+                    budgetService.getBudgets().catch(() => ({ data: { data: [] } }))
+                ]);
+                setTxs(txRes.data?.data || []);
+                setBudgets(budgetRes.data?.data || []);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, []);
+
+    const totalIncome = txs.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    const totalExpenses = txs.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    const netSavings = totalIncome - totalExpenses;
+
     const summaries = [
-        { title: 'Total Income', amount: '12,450.00', change: '+12.5%', icon: ArrowUpRight, color: 'text-emerald-400', glowColor: '#10b981' },
-        { title: 'Total Expenses', amount: '5,230.12', change: '-4.2%', icon: ArrowDownRight, color: 'text-rose-400', glowColor: '#ef4444' },
-        { title: 'Net Savings', amount: '7,219.88', change: '+28.4%', icon: Wallet, color: 'text-blue-400', glowColor: '#3b82f6' },
-        { title: 'Portfolio Value', amount: '48,295.50', change: '+5.2%', icon: TrendingUp, color: 'text-purple-400', glowColor: '#8b5cf6' },
+        { title: 'Total Income', amount: totalIncome.toFixed(2), change: '+0.0%', icon: ArrowUpRight, color: 'text-emerald-400', glowColor: '#10b981' },
+        { title: 'Total Expenses', amount: totalExpenses.toFixed(2), change: '-0.0%', icon: ArrowDownRight, color: 'text-rose-400', glowColor: '#ef4444' },
+        { title: 'Net Savings', amount: netSavings.toFixed(2), change: '+0.0%', icon: Wallet, color: 'text-blue-400', glowColor: '#3b82f6' },
+        { title: 'Portfolio Value', amount: '0.00', change: '+0.0%', icon: TrendingUp, color: 'text-purple-400', glowColor: '#8b5cf6' },
     ];
 
-    // Income vs Expense Chart Data
-    const trendData = [
-        { name: 'Jan', income: 4500, expense: 3200 },
-        { name: 'Feb', income: 5200, expense: 3500 },
-        { name: 'Mar', income: 4800, expense: 3100 },
-        { name: 'Apr', income: 6100, expense: 3800 },
-        { name: 'May', income: 5900, expense: 3400 },
-        { name: 'Jun', income: 7200, expense: 4100 },
+    // Compute basic trend purely based on existing txs
+    // Real implementation would group by month, simplified here to just current txs grouped roughly by name
+    const monthlyData = txs.reduce((acc, t) => {
+        const month = new Date(t.date).toLocaleString('default', { month: 'short' });
+        if (!acc[month]) acc[month] = { name: month, income: 0, expense: 0 };
+        if (t.type === 'income') acc[month].income += parseFloat(t.amount);
+        if (t.type === 'expense') acc[month].expense += parseFloat(t.amount);
+        return acc;
+    }, {});
+    const trendData = Object.values(monthlyData).length > 0 ? Object.values(monthlyData) : [
+        { name: 'Jan', income: 0, expense: 0 }, { name: 'Feb', income: 0, expense: 0 }
     ];
 
-    // Expense Categories Chart Data
-    const categoryData = [
-        { name: 'Housing', value: 40, color: '#3b82f6' },
-        { name: 'Food', value: 25, color: '#10b981' },
-        { name: 'Transport', value: 15, color: '#f59e0b' },
-        { name: 'Others', value: 20, color: '#8b5cf6' },
-    ];
+    const categoryColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const catDataMap = txs.filter(t => t.type === 'expense').reduce((acc, t) => {
+        const catName = t.categories?.name || 'Unknown';
+        acc[catName] = (acc[catName] || 0) + parseFloat(t.amount);
+        return acc;
+    }, {});
 
-    // Budget Usage Data
-    const budgetData = [
-        { name: 'Dining', current: 450, total: 500 },
-        { name: 'Shopping', current: 1200, total: 1000 },
-        { name: 'Leisure', current: 300, total: 750 },
-    ];
+    const categoryData = Object.entries(catDataMap).map(([name, value], idx) => ({
+        name, value, color: categoryColors[idx % categoryColors.length]
+    }));
 
-    // Recent Transactions
-    const transactions = [
-        { id: 1, desc: 'Apple Subscription', cat: 'Digital', date: '28 Feb 2026', amount: -14.99, status: 'Completed' },
-        { id: 2, desc: 'Salary Deposit', cat: 'Income', date: '27 Feb 2026', amount: 4500.00, status: 'Completed' },
-        { id: 3, desc: 'Whole Foods', cat: 'Groceries', date: '26 Feb 2026', amount: -245.20, status: 'Pending' },
-        { id: 4, desc: 'Uber Ride', cat: 'Transport', date: '26 Feb 2026', amount: -32.50, status: 'Completed' },
-    ];
+    if (categoryData.length === 0) {
+        categoryData.push({ name: 'No Expenses', value: 100, color: '#94a3b8' });
+    }
+
+    const budgetData = budgets.map(b => ({
+        name: b.categories?.name || 'Budget',
+        current: parseFloat(b.spent_amount || 0),
+        total: parseFloat(b.amount || 0)
+    }));
+
+    if (budgetData.length === 0) {
+        budgetData.push({ name: 'No Budgets', current: 0, total: 100 });
+    }
 
     const handleHideCard = (title) => {
-        alert(`Hidden ${title} (Implement state management for hiding)`);
+        alert(`Hidden ${title}`);
     };
 
     const handleViewDetails = (title) => {
@@ -177,6 +208,14 @@ const Dashboard = () => {
     const handleEditWidget = (title) => {
         alert(`Opening edit settings for ${title}`);
     };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -277,7 +316,7 @@ const Dashboard = () => {
                                 {categoryData.map((c, i) => (
                                     <div key={i} className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }}></div>
-                                        <span className="text-[11px] text-slate-500 dark:text-gray-400 font-medium">{c.name} ({c.value}%)</span>
+                                        <span className="text-[11px] text-slate-500 dark:text-gray-400 font-medium">{c.name}</span>
                                     </div>
                                 ))}
                             </div>
@@ -286,11 +325,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Bottom Section: Budget, Savings & Transactions */}
+            {/* Bottom Section: Budget, Savings */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-8">
-                {/* Budget Usage & Savings */}
+                {/* Budget Usage */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
-                    {/* Bar Chart Budget Usage */}
                     <div className="glass-card rounded-[24px] p-6 h-full flex flex-col cursor-pointer hover:bg-slate-200/50 dark:hover:bg-white/[0.04] transition-colors" onClick={() => navigate('/budgets')}>
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Budget Usage</h3>
@@ -314,42 +352,7 @@ const Dashboard = () => {
                             </ResponsiveContainer>
                         </div>
                     </div>
-
-                    {/* Savings Goals */}
-                    <div className="glass-card rounded-[24px] p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Savings Goals</h3>
-                            <button
-                                onClick={() => navigate('/goals')}
-                                className="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors uppercase tracking-wider bg-blue-100 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg"
-                            >
-                                Add Goal
-                            </button>
-                        </div>
-                        <div className="space-y-6">
-                            {[
-                                { name: 'Emergency Fund', current: 15000, target: 20000, p: 75, color: 'bg-blue-500' },
-                                { name: 'Vacation', current: 2250, target: 5000, p: 45, color: 'bg-emerald-500' },
-                                { name: 'New Car', current: 12000, target: 40000, p: 30, color: 'bg-purple-500' },
-                            ].map((goal, idx) => (
-                                <div key={idx} className="space-y-2 cursor-pointer group" onClick={() => navigate('/goals')}>
-                                    <div className="flex justify-between text-[13px] font-medium">
-                                        <span className="text-slate-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{goal.name}</span>
-                                        <span className="text-slate-500 dark:text-gray-400">${goal.current.toLocaleString()} / <span className="text-slate-800 dark:text-gray-600">${goal.target.toLocaleString()}</span></span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
-                                        <div className={`h-full ${goal.color} rounded-full transition-all duration-1000 group-hover:brightness-110 dark:group-hover:brightness-125`} style={{ width: `${goal.p}%` }}></div>
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <span className={`text-[11px] font-bold ${goal.color.replace('bg-', 'text-')}`}>{goal.p}% Reach</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
-
-                {/* Recent Transactions Table REMOVED per user request */}
             </div>
         </div>
     );

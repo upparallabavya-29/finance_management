@@ -1,4 +1,4 @@
-import supabase from '../config/supabaseClient.js';
+import { supabase, supabaseAuth } from '../config/supabase.js';
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -12,7 +12,7 @@ export const registerUser = async (req, res) => {
         }
 
         // 1. Sign up user via Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        const { data: authData, error: authError } = await supabaseAuth.auth.signUp({
             email,
             password,
             options: {
@@ -29,10 +29,19 @@ export const registerUser = async (req, res) => {
 
         const userId = authData.user.id;
 
-        // The Supabase database has a trigger `on_auth_user_created` that automatically 
-        // inserts the user profile into the `public.users` table upon signup.
-        // We just need to wait a moment to ensure it's written before proceeding, 
-        // or we can just rely on the data provided in the request for the response.
+        // Proactively insert the user into `public.users` because the DB trigger 
+        // `on_auth_user_created` often fails if RLS or permissions are mismatched.
+        // This guarantees `categories`, `budgets`, and `transactions` won't throw FK errors.
+        await supabase
+            .from('users')
+            .upsert([{
+                id: userId,
+                email: email,
+                first_name: firstName,
+                last_name: lastName
+            }])
+            .select()
+            .single();
 
         res.status(201).json({
             success: true,
@@ -64,21 +73,37 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide email and password' });
         }
 
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseAuth.auth.signInWithPassword({
             email,
             password,
         });
 
         if (error) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            console.error('Supabase Login Error:', error);
+            return res.status(401).json({ success: false, message: error.message || 'Invalid credentials' });
         }
 
         // Fetch user profile details
-        const { data: profile, error: profileError } = await supabase
+        let { data: profile, error: profileError } = await supabase
             .from('users')
             .select('first_name, last_name')
             .eq('id', data.user.id)
             .single();
+
+        // If user profile is not found in public.users, insert it now as a fallback
+        if (profileError && profileError.code === 'PGRST116') {
+            const { data: newProfile, error: insertError } = await supabase
+                .from('users')
+                .insert([{
+                    id: data.user.id,
+                    email: data.user.email,
+                    first_name: data.user.user_metadata?.first_name || '',
+                    last_name: data.user.user_metadata?.last_name || ''
+                }])
+                .select()
+                .single();
+            if (!insertError) profile = newProfile;
+        }
 
         res.status(200).json({
             success: true,
@@ -110,7 +135,7 @@ export const logoutUser = async (req, res) => {
 
         // We sign out using the token. Note: In a true stateless JWT setup, deleting token client-side is often enough, 
         // but calling signOut invalidates the session in Supabase.
-        const { error } = await supabase.auth.admin.signOut(token); // Or supabase.auth.signOut() if context is bound, but admin is safer for server-side if using service key.
+        const { error } = await supabaseAuth.auth.admin.signOut(token); // Or supabase.auth.signOut() if context is bound, but admin is safer for server-side if using service key.
         // For anon key, we generally rely on client to clear token, but we can try to invalidate it if we pass it down.
         // If we don't have admin key, we basically just tell the client "success, please delete your token".
 

@@ -9,7 +9,8 @@ export const getBudgets = async (req, res) => {
                 categories (
                     name
                 )
-            `);
+            `)
+            .eq('user_id', req.user.id);
 
         if (error) throw error
 
@@ -21,7 +22,8 @@ export const getBudgets = async (req, res) => {
 
 export const createBudget = async (req, res) => {
     try {
-        const { category, limit_amount, period, user_id } = req.body
+        const { category, limit_amount, period } = req.body
+        const user_id = req.user.id
 
         if (!category || !limit_amount || !period) {
             return res.status(400).json({ success: false, message: 'Missing required fields' })

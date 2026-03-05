@@ -31,6 +31,10 @@ export const createTransaction = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
+        // DEBUG: Check if user exists in public.users
+        const { data: userRecord, error: userError } = await supabase.from('users').select('*').eq('id', user_id).single();
+        console.log('DEBUG: User in public.users:', userRecord, 'Error:', userError);
+
         // 1. Get or create category
         let categoryId;
         const { data: existingCat, error: catSearchErr } = await supabase

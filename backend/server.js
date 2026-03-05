@@ -5,6 +5,8 @@ import transactionRoutes from './routes/transactionRoutes.js';
 import debtRoutes from './routes/debtRoutes.js';
 import investmentRoutes from './routes/investmentRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import budgetRoutes from './routes/budgetRoutes.js';
+import goalRoutes from './routes/goalRoutes.js';
 
 dotenv.config();
 
@@ -20,6 +22,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/debts', debtRoutes);
 app.use('/api/investments', investmentRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/goals', goalRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {
