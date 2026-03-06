@@ -82,7 +82,7 @@ export const createBudget = async (req, res) => {
             .select('id')
             .eq('user_id', user_id)
             .eq('name', category)
-            .single();
+            .maybeSingle();
 
         if (existingCat) {
             categoryId = existingCat.id;
