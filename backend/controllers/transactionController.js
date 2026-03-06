@@ -4,12 +4,7 @@ export const getTransactions = async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('transactions')
-            .select(`
-                *,
-                categories (
-                    name
-                )
-            `)
+            .select('*')
             .eq('user_id', req.user.id)
             .order('date', { ascending: false });
 
@@ -68,7 +63,7 @@ export const createTransaction = async (req, res) => {
                 description,
                 type
             }])
-            .select(`*, categories(*)`);
+            .select();
 
         if (error) throw error;
 

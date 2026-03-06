@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../services/supabase';
 import { transactionService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Plus, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
@@ -29,7 +30,7 @@ const Transactions = () => {
             const res = await transactionService.getTransactions();
             setTransactions(res.data?.data || []);
         } catch (error) {
-            console.error('Error fetching transactions:', error);
+            console.error('Error fetching transactions (API):', error);
             setTransactions([]);
         } finally {
             setLoading(false);
@@ -46,28 +47,53 @@ const Transactions = () => {
         setIsSubmitting(true);
 
         try {
-            await transactionService.createTransaction({
-                description,
-                amount: parseFloat(amount),
-                category,
-                date,
-                type,
-                user_id: user?.id
-            });
+            // 1. Check or create category map dynamically if we must
+            const { data: existingCat } = await supabase
+                .from('categories')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('name', category)
+                .eq('type', type)
+                .single();
+
+            let targetCategoryId = existingCat?.id;
+
+            if (!targetCategoryId) {
+                const { data: newCat } = await supabase
+                    .from('categories')
+                    .insert([{ user_id: user.id, name: category, type }])
+                    .select()
+                    .single();
+                if (newCat) targetCategoryId = newCat.id;
+            }
+
+            // 2. Insert transaction directly via Supabase Client
+            const { error: txError } = await supabase
+                .from('transactions')
+                .insert([{
+                    description,
+                    amount: parseFloat(amount),
+                    category_id: targetCategoryId,
+                    date,
+                    type,
+                    user_id: user.id
+                }]);
+
+            if (txError) throw txError;
 
             // Reset form
             setDescription('');
             setAmount('');
-            setCategory('');
+            setCategory(CATEGORIES[type][0]);
             setDate(new Date().toISOString().split('T')[0]);
             setType('expense');
             setIsModalOpen(false);
 
-            // Refresh list
+            // Refresh list dynamically
             fetchTransactions();
         } catch (err) {
-            console.error('Failed to create transaction:', err);
-            setError(err.response?.data?.message || 'Failed to create transaction');
+            console.error('Failed to create transaction via Supabase:', err);
+            setError(err.message || 'Failed to create transaction');
         } finally {
             setIsSubmitting(false);
         }
@@ -134,7 +160,7 @@ const Transactions = () => {
                                             {tx.description}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-gray-400 capitalize">
-                                            {tx.categories?.name || 'Unknown'}
+                                            {tx.category_id ? 'Categorized' : 'Unknown'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right">
                                             <div className="flex items-center justify-end gap-1.5">

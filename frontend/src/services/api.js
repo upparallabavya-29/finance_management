@@ -39,11 +39,4 @@ export const budgetService = {
     deleteBudget: (id) => api.delete(`/budgets/${id}`)
 }
 
-export const goalService = {
-    getGoals: () => api.get('/goals'),
-    createGoal: (data) => api.post('/goals', data),
-    updateGoal: (id, data) => api.put(`/goals/${id}`, data),
-    deleteGoal: (id) => api.delete(`/goals/${id}`)
-}
-
 export default api

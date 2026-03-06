@@ -4,11 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Budgets from './pages/Budgets'
-import Debts from './pages/Debts'
-import Investments from './pages/Investments'
-import Reports from './pages/Reports'
 import Settings from './pages/Settings'
-import Goals from './pages/Goals'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
@@ -58,10 +54,6 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/transactions" element={<Transactions />} />
                   <Route path="/budgets" element={<Budgets />} />
-                  <Route path="/debts" element={<Debts />} />
-                  <Route path="/investments" element={<Investments />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/goals" element={<Goals />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

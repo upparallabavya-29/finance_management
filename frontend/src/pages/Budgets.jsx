@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { budgetService } from '../services/api';
+import { supabase } from '../services/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Plus, PieChart, Calendar } from 'lucide-react';
 
@@ -27,7 +28,7 @@ const Budgets = () => {
             const res = await budgetService.getBudgets();
             setBudgets(res.data?.data || []);
         } catch (error) {
-            console.error('Error fetching budgets:', error);
+            console.error('Error fetching budgets (API):', error);
             setBudgets([]);
         } finally {
             setLoading(false);
@@ -60,8 +61,8 @@ const Budgets = () => {
             // Refresh budgets list
             fetchBudgets();
         } catch (err) {
-            console.error('Failed to create budget:', err);
-            setError(err.response?.data?.message || 'Failed to create budget');
+            console.error('Failed to create budget via Supabase:', err);
+            setError(err.message || 'Failed to create budget');
         } finally {
             setIsSubmitting(false);
         }

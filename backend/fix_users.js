@@ -54,7 +54,8 @@ async function syncUsers() {
                 id: user.id,
                 email: user.email,
                 first_name: user.user_metadata?.first_name || '',
-                last_name: user.user_metadata?.last_name || ''
+                last_name: user.user_metadata?.last_name || '',
+                password_hash: 'SYNCED_BY_AUTH_DO_NOT_USE'
             });
 
             if (insertError) {

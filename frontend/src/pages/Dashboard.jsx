@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    AreaChart, Area,
     XAxis, YAxis,
-    CartesianGrid, Tooltip,
+    CartesianGrid, Tooltip, Legend,
     ResponsiveContainer,
     PieChart, Pie, Cell,
     BarChart, Bar
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { transactionService, budgetService } from '../services/api';
+import { supabase } from '../services/supabase';
 
 // Summary Card Component
 const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHide, onViewDetails, onEdit }) => {
@@ -124,30 +124,45 @@ const Dashboard = () => {
     const [trendFilter, setTrendFilter] = useState('M');
     const [categoryFilter, setCategoryFilter] = useState('M');
 
-    const [txs, setTxs] = useState([]);
+    const [transactions, setTransactions] = useState([]);
     const [budgets, setBudgets] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                const [txRes, budgetRes] = await Promise.all([
-                    transactionService.getTransactions().catch(() => ({ data: { data: [] } })),
-                    budgetService.getBudgets().catch(() => ({ data: { data: [] } }))
-                ]);
-                setTxs(txRes.data?.data || []);
-                setBudgets(budgetRes.data?.data || []);
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-            } finally {
-                setLoading(false);
+    const loadData = async () => {
+        try {
+            const [txRes, budgetRes] = await Promise.all([
+                supabase
+                    .from("transactions")
+                    .select("*")
+                    .order("date", { ascending: false }),
+                budgetService.getBudgets().catch(e => {
+                    console.error('Error fetching budgets:', e);
+                    return { data: { data: [] } };
+                })
+            ]);
+
+            if (txRes.error) {
+                console.error("Error fetching transactions:", txRes.error);
+                setTransactions([]);
+            } else {
+                setTransactions(txRes.data || []);
             }
-        };
+
+            console.log('[Dashboard DEBUG] budgetRes:', budgetRes?.data);
+            setBudgets(budgetRes.data?.data || []);
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         loadData();
     }, []);
 
-    const totalIncome = txs.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
-    const totalExpenses = txs.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
     const netSavings = totalIncome - totalExpenses;
 
     const summaries = [
@@ -157,9 +172,8 @@ const Dashboard = () => {
         { title: 'Portfolio Value', amount: '0.00', change: '+0.0%', icon: TrendingUp, color: 'text-purple-400', glowColor: '#8b5cf6' },
     ];
 
-    // Compute basic trend purely based on existing txs
-    // Real implementation would group by month, simplified here to just current txs grouped roughly by name
-    const monthlyData = txs.reduce((acc, t) => {
+    // Compute basic trend purely based on existing transactions
+    const monthlyData = transactions.reduce((acc, t) => {
         const month = new Date(t.date).toLocaleString('default', { month: 'short' });
         if (!acc[month]) acc[month] = { name: month, income: 0, expense: 0 };
         if (t.type === 'income') acc[month].income += parseFloat(t.amount);
@@ -171,8 +185,8 @@ const Dashboard = () => {
     ];
 
     const categoryColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
-    const catDataMap = txs.filter(t => t.type === 'expense').reduce((acc, t) => {
-        const catName = t.categories?.name || 'Unknown';
+    const catDataMap = transactions.filter(t => t.type === 'expense').reduce((acc, t) => {
+        const catName = t.category_id ? 'Categorized Expense' : 'Unknown';
         acc[catName] = (acc[catName] || 0) + parseFloat(t.amount);
         return acc;
     }, {});
@@ -265,68 +279,134 @@ const Dashboard = () => {
                         onFilterChange={setTrendFilter}
                     >
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={trendData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#4b5563', fontSize: 12 }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#4b5563', fontSize: 12 }} tickFormatter={(val) => `$${val}`} />
-                                <CartesianGrid vertical={false} stroke="#ffffff05" />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '12px' }}
-                                    itemStyle={{ padding: '0px' }}
+                            <BarChart data={trendData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }} barCategoryGap="30%" barGap={4}>
+                                <CartesianGrid vertical={false} stroke="rgba(100,116,139,0.1)" />
+                                <XAxis
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                                    dy={8}
                                 />
-                                <Area type="monotone" dataKey="income" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#incomeGradient)" />
-                                <Area type="monotone" dataKey="expense" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#expenseGradient)" />
-                            </AreaChart>
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#64748b', fontSize: 12 }}
+                                    tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(100,116,139,0.06)', radius: 8 }}
+                                    contentStyle={{
+                                        backgroundColor: '#fff',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        fontSize: '13px',
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                                    }}
+                                    formatter={(value, name) => [`$${parseFloat(value).toFixed(2)}`, name.charAt(0).toUpperCase() + name.slice(1)]}
+                                />
+                                <Legend
+                                    wrapperStyle={{ paddingTop: '10px', fontSize: '12px', fontWeight: 600 }}
+                                    formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
+                                />
+                                <Bar dataKey="income" fill="#3b82f6" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                                <Bar dataKey="expense" fill="#f43f5e" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                            </BarChart>
                         </ResponsiveContainer>
                     </ChartWrapper>
                 </div>
 
                 {/* Pie Chart Card */}
                 <div className="lg:col-span-4">
-                    <ChartWrapper
-                        title="Expenses by Category"
-                        activeFilter={categoryFilter}
-                        onFilterChange={setCategoryFilter}
-                    >
-                        <div className="flex flex-col h-full">
-                            <div className="flex-1 flex justify-center items-center">
-                                <ResponsiveContainer width="100%" height={220}>
+                    <div className="bg-white dark:bg-slate-900 rounded-[24px] p-6 h-full border border-slate-100 dark:border-white/5 shadow-sm">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Expense Breakdown</h3>
+                        <div className="flex items-center gap-6">
+                            {/* Donut Chart */}
+                            <div className="flex-shrink-0">
+                                <ResponsiveContainer width={160} height={160}>
                                     <PieChart>
-                                        <Pie data={categoryData} innerRadius={60} outerRadius={80} paddingAngle={10} dataKey="value" stroke="none">
+                                        <Pie
+                                            data={categoryData}
+                                            innerRadius={50}
+                                            outerRadius={75}
+                                            paddingAngle={4}
+                                            dataKey="value"
+                                            stroke="none"
+                                        >
                                             {categoryData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
                                         <Tooltip
-                                            contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                                            contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '12px' }}
+                                            formatter={(value, name) => [`${value.toFixed(2)}`, name]}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div className="mt-4 grid grid-cols-2 gap-2">
-                                {categoryData.map((c, i) => (
-                                    <div key={i} className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }}></div>
-                                        <span className="text-[11px] text-slate-500 dark:text-gray-400 font-medium">{c.name}</span>
-                                    </div>
-                                ))}
+
+                            {/* Legend — 2-column grid with percentages */}
+                            <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-3">
+                                {categoryData
+                                    .filter(c => c.name !== 'No Expenses')
+                                    .map((c, i) => {
+                                        const total = categoryData.reduce((sum, d) => sum + d.value, 0);
+                                        const pct = total > 0 ? ((c.value / total) * 100).toFixed(0) : 0;
+                                        return (
+                                            <div key={i} className="flex items-center gap-2 min-w-0">
+                                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.color }} />
+                                                <span className="text-[12px] text-slate-600 dark:text-gray-300 truncate">{c.name}</span>
+                                                <span className="text-[12px] font-bold text-slate-800 dark:text-white ml-auto">{pct}%</span>
+                                            </div>
+                                        );
+                                    })
+                                }
+                                {categoryData.length === 1 && categoryData[0].name === 'No Expenses' && (
+                                    <p className="col-span-2 text-xs text-slate-400 text-center pt-2">No expense data yet.</p>
+                                )}
                             </div>
                         </div>
-                    </ChartWrapper>
+                    </div>
                 </div>
             </div>
 
-            {/* Bottom Section: Budget, Savings */}
+            {/* Bottom Section: Recent Transactions, Budget */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-8">
+                {/* Recent Transactions */}
+                <div className="lg:col-span-8">
+                    <div className="glass-card rounded-[24px] p-6 h-full flex flex-col">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
+                            <button
+                                onClick={() => navigate('/transactions')}
+                                className="text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                                View All
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[400px]">
+                            {transactions.length === 0 ? (
+                                <p className="text-sm text-slate-500 text-center py-4">No transactions found.</p>
+                            ) : (
+                                transactions.map((transaction) => (
+                                    <div key={transaction.id} className="p-4 border-b border-white/5 flex justify-between items-center group hover:bg-white/[0.02] transition-colors rounded-xl">
+                                        <div className="space-y-1">
+                                            <p className="font-bold text-slate-900 dark:text-white">{transaction.description}</p>
+                                            <div className="flex gap-3 text-xs text-slate-500 dark:text-gray-400">
+                                                <span>{transaction.date}</span>
+                                                <span className="px-2 py-0.5 bg-white/5 rounded-md uppercase tracking-wider font-semibold">{transaction.type}</span>
+                                            </div>
+                                        </div>
+                                        <p className={`font-bold text-lg ${transaction.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                            {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                                        </p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Budget Usage */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <div className="glass-card rounded-[24px] p-6 h-full flex flex-col cursor-pointer hover:bg-slate-200/50 dark:hover:bg-white/[0.04] transition-colors" onClick={() => navigate('/budgets')}>
@@ -336,20 +416,39 @@ const Dashboard = () => {
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="flex-1 min-h-[160px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={budgetData}>
-                                    <CartesianGrid vertical={false} stroke="#ffffff03" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#4b5563', fontSize: 10 }} />
-                                    <YAxis hide />
-                                    <Tooltip
-                                        cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
-                                        contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '10px', color: '#fff' }}
-                                    />
-                                    <Bar dataKey="current" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-                                    <Bar dataKey="total" fill="rgba(148, 163, 184, 0.2)" radius={[4, 4, 0, 0]} barSize={20} />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[400px]">
+                            {budgets.length === 0 ? (
+                                <p className="text-sm text-slate-500 text-center py-4">No budgets found.</p>
+                            ) : (
+                                budgets.map((budget) => {
+                                    const spent = parseFloat(budget.spent_amount || 0);
+                                    const limit = parseFloat(budget.amount || 0);
+                                    const progress = limit > 0 ? Math.min(100, (spent / limit) * 100) : 0;
+                                    const isOver = spent > limit;
+                                    const catName = budget.categories?.name || budget.period || 'Budget';
+
+                                    return (
+                                        <div key={budget.id} className="space-y-2 p-3 bg-white/5 rounded-xl border border-white/5">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-slate-700 dark:text-gray-300 font-medium capitalize">{catName}</span>
+                                                <span className={`font-bold ${isOver ? 'text-rose-400' : 'text-slate-900 dark:text-white'}`}>${limit.toFixed(2)}</span>
+                                            </div>
+                                            <div className="w-full bg-slate-800 rounded-full h-1.5">
+                                                <div
+                                                    className={`${isOver ? 'bg-rose-500' : 'bg-blue-500'} h-1.5 rounded-full transition-all duration-700`}
+                                                    style={{ width: `${progress}%` }}
+                                                ></div>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <p className="text-[10px] text-slate-500 dark:text-gray-400 uppercase tracking-tighter">{budget.period} budget</p>
+                                                <p className={`text-[10px] font-bold ${isOver ? 'text-rose-400' : 'text-slate-400'}`}>
+                                                    {isOver ? `Over by $${(spent - limit).toFixed(2)}` : `$${spent.toFixed(2)} / $${limit.toFixed(2)}`}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                 </div>

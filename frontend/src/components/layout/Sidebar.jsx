@@ -29,10 +29,6 @@ const Sidebar = () => {
         { name: 'Dashboard', href: '/', icon: LayoutDashboard },
         { name: 'Income & Expenses', href: '/transactions', icon: ArrowUpRight },
         { name: 'Budgets', href: '/budgets', icon: PieChart },
-        { name: 'Savings Goals', href: '/goals', icon: Target },
-        { name: 'Debts', href: '/debts', icon: CircleDollarSign },
-        { name: 'Investments', href: '/investments', icon: TrendingUp },
-        { name: 'Reports', href: '/reports', icon: FileBarChart },
         { name: 'Settings', href: '/settings', icon: Settings },
     ];
 

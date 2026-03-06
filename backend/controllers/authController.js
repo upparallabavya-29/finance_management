@@ -38,7 +38,8 @@ export const registerUser = async (req, res) => {
                 id: userId,
                 email: email,
                 first_name: firstName,
-                last_name: lastName
+                last_name: lastName,
+                password_hash: 'SYNCED_BY_AUTH_DO_NOT_USE'
             }])
             .select()
             .single();
@@ -98,7 +99,8 @@ export const loginUser = async (req, res) => {
                     id: data.user.id,
                     email: data.user.email,
                     first_name: data.user.user_metadata?.first_name || '',
-                    last_name: data.user.user_metadata?.last_name || ''
+                    last_name: data.user.user_metadata?.last_name || '',
+                    password_hash: 'SYNCED_BY_AUTH_DO_NOT_USE'
                 }])
                 .select()
                 .single();

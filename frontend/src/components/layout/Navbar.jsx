@@ -8,14 +8,22 @@ const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [hasUnread, setHasUnread] = useState(true);
 
     // Extract display name
     const displayName = user?.email ? user.email.split('@')[0] : 'User';
     const capitalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
 
     const handleLogout = () => {
+        setIsProfileOpen(false);
         logout();
         navigate('/login');
+    };
+
+    const handleNavigate = (path) => {
+        setIsProfileOpen(false);
+        navigate(path);
     };
 
     return (
@@ -35,10 +43,63 @@ const Navbar = () => {
             {/* Right side Actions */}
             <div className="flex items-center gap-6">
                 {/* Notification */}
-                <button className="relative p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white transition-all">
-                    <Bell className="w-5 h-5" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white dark:border-[#050510]"></span>
-                </button>
+                <div className="relative">
+                    <button
+                        onClick={() => setIsNotifOpen(!isNotifOpen)}
+                        onBlur={() => setTimeout(() => setIsNotifOpen(false), 150)}
+                        className="relative p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white transition-all"
+                    >
+                        <Bell className="w-5 h-5" />
+                        {hasUnread && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white dark:border-[#050510]"></span>
+                        )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {isNotifOpen && (
+                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                            <div className="flex justify-between items-center px-4 py-3 border-b border-slate-100 dark:border-white/5">
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Notifications</h4>
+                                <button
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => setHasUnread(false)}
+                                    className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                                >
+                                    Mark all as read
+                                </button>
+                            </div>
+                            <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-72 overflow-y-auto">
+                                {[
+                                    { icon: '💸', title: 'Budget exceeded', desc: 'Food & Dining is over budget by $862', time: 'Just now', unread: true },
+                                    { icon: '✅', title: 'Transaction added', desc: 'New expense of $150 recorded', time: '2h ago', unread: true },
+                                    { icon: '📊', title: 'Monthly report ready', desc: 'Your March summary is available', time: '1d ago', unread: false },
+                                ].map((n, i) => (
+                                    <div
+                                        key={i}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        className={`flex items-start gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer transition-colors ${n.unread ? 'bg-blue-50/50 dark:bg-blue-500/5' : ''}`}
+                                    >
+                                        <span className="text-xl mt-0.5">{n.icon}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white">{n.title}</p>
+                                            <p className="text-xs text-slate-500 dark:text-gray-400 truncate">{n.desc}</p>
+                                        </div>
+                                        <span className="text-[10px] text-slate-400 dark:text-gray-500 whitespace-nowrap mt-1">{n.time}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="px-4 py-2.5 border-t border-slate-100 dark:border-white/5 text-center">
+                                <button
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => { setIsNotifOpen(false); navigate('/settings'); }}
+                                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                                >
+                                    View all notifications
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 {/* Vertical Divider */}
                 <div className="h-8 w-px bg-slate-200 dark:bg-white/10"></div>
@@ -47,7 +108,7 @@ const Navbar = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        onBlur={() => setTimeout(() => setIsProfileOpen(false), 200)}
+                        onBlur={() => setTimeout(() => setIsProfileOpen(false), 150)}
                         className="flex items-center gap-3 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all group"
                     >
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 flex items-center justify-center border border-slate-200 dark:border-white/10 overflow-hidden shadow-inner">
@@ -73,11 +134,19 @@ const Navbar = () => {
                             </div>
 
                             <div className="py-1">
-                                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white transition-colors">
+                                <button
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => handleNavigate('/settings')}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white transition-colors"
+                                >
                                     <User className="w-4 h-4 text-slate-400 dark:text-gray-500" />
                                     Your Profile
                                 </button>
-                                <button className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white transition-colors">
+                                <button
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => handleNavigate('/settings')}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white transition-colors"
+                                >
                                     <SettingsIcon className="w-4 h-4 text-slate-400 dark:text-gray-500" />
                                     Settings
                                 </button>
@@ -86,6 +155,7 @@ const Navbar = () => {
                             <div className="h-px bg-slate-200 dark:bg-white/5 my-1"></div>
 
                             <button
+                                onMouseDown={(e) => e.preventDefault()}
                                 onClick={handleLogout}
                                 className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-bold text-rose-500 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10 transition-colors"
                             >
