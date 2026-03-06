@@ -41,7 +41,7 @@ const Sidebar = () => {
                         <Wallet className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                        Finance<span className="text-blue-600 dark:text-blue-500">X</span>
+                        Finance<span className="text-blue-600 dark:text-blue-500"> Management</span>
                     </span>
                 </div>
             </div>
