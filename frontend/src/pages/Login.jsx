@@ -6,17 +6,27 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [slowMsg, setSlowMsg] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setSlowMsg('');
+        setLoading(true);
+        const slowTimer = setTimeout(() => setSlowMsg('Server is waking up, please wait 30s...'), 3000);
         try {
             await login(email, password);
+            clearTimeout(slowTimer);
             navigate('/');
         } catch (err) {
+            clearTimeout(slowTimer);
             setError(err.response?.data?.message || err.message || 'Failed to login');
+        } finally {
+            setLoading(false);
+            setSlowMsg('');
         }
     };
 
@@ -40,6 +50,11 @@ const Login = () => {
                         {error && (
                             <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm text-center font-medium">
                                 {error}
+                            </div>
+                        )}
+                        {slowMsg && (
+                            <div className="bg-amber-50 text-amber-700 p-3 rounded-lg text-sm text-center font-medium animate-pulse">
+                                ⏳ {slowMsg}
                             </div>
                         )}
                         <div>
@@ -73,9 +88,18 @@ const Login = () => {
                         <div>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-[#0c2420] hover:bg-[#15322d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all active:scale-[0.98]"
+                                disabled={loading}
+                                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-[#0c2420] hover:bg-[#15322d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                Log in
+                                {loading ? (
+                                    <>
+                                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                        </svg>
+                                        Logging in...
+                                    </>
+                                ) : 'Log in'}
                             </button>
                         </div>
                     </form>
