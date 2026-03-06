@@ -70,14 +70,14 @@ const Budgets = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">Budgets</h2>
                     <p className="text-slate-500 dark:text-gray-400 text-sm">Control your spending and stick to your limits.</p>
                 </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                    className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-blue-500/20"
                 >
                     <Plus className="w-4 h-4" />
                     New Budget

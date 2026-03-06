@@ -2,6 +2,16 @@ import { supabase } from '../config/supabase.js'
 
 export const getTransactions = async (req, res) => {
     try {
+        const { data: categories } = await supabase
+            .from('categories')
+            .select('id, name')
+            .eq('user_id', req.user.id);
+
+        const categoryMap = {};
+        if (categories) {
+            categories.forEach(c => categoryMap[c.id] = c.name);
+        }
+
         const { data, error } = await supabase
             .from('transactions')
             .select('*')
@@ -10,7 +20,12 @@ export const getTransactions = async (req, res) => {
 
         if (error) throw error;
 
-        return res.status(200).json({ success: true, data });
+        const enrichedData = data.map(t => ({
+            ...t,
+            categories: { name: categoryMap[t.category_id] || 'Uncategorized' }
+        }));
+
+        return res.status(200).json({ success: true, data: enrichedData });
     } catch (error) {
         console.error('Error fetching transactions:', error);
         return res.status(500).json({ success: false, message: 'Server Error fetching transactions' });
@@ -75,8 +90,28 @@ export const createTransaction = async (req, res) => {
 };
 
 export const updateTransaction = async (req, res) => {
-    // Placeholder for future updates
-    res.status(200).json({ success: true });
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        const user_id = req.user.id;
+
+        const { data, error } = await supabase
+            .from('transactions')
+            .update(updates)
+            .eq('id', id)
+            .eq('user_id', user_id)
+            .select();
+
+        if (error) throw error;
+        if (!data || data.length === 0) {
+            return res.status(404).json({ success: false, message: 'Transaction not found or not authorized' });
+        }
+
+        res.status(200).json({ success: true, data: data[0] });
+    } catch (error) {
+        console.error('Update Transaction Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 export const deleteTransaction = async (req, res) => {

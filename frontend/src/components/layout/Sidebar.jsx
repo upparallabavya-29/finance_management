@@ -10,12 +10,13 @@ import {
     FileBarChart,
     Settings,
     LogOut,
-    Wallet
+    Wallet,
+    X
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
 
-const Sidebar = () => {
+const Sidebar = ({ onClose }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -23,6 +24,10 @@ const Sidebar = () => {
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const handleNavigation = (href) => {
+        if (onClose) onClose();
     };
 
     const navigation = [
@@ -33,9 +38,9 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="w-[280px] glass-sidebar flex flex-col shrink-0 h-full">
+        <div className="w-[280px] glass-sidebar flex flex-col shrink-0 h-full bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-white/5">
             {/* Logo */}
-            <div className="h-20 flex items-center px-8 border-b border-slate-200 dark:border-white/5">
+            <div className="h-16 sm:h-20 flex items-center justify-between px-6 sm:px-8 border-b border-slate-200 dark:border-white/5 shrink-0">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                         <Wallet className="w-5 h-5 text-white" />
@@ -44,6 +49,14 @@ const Sidebar = () => {
                         Finance<span className="text-blue-600 dark:text-blue-500"> Management</span>
                     </span>
                 </div>
+
+                {/* Close Button (Mobile Only) */}
+                <button
+                    onClick={onClose}
+                    className="p-2 -mr-2 text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white lg:hidden"
+                >
+                    <X className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Navigation */}
@@ -54,11 +67,12 @@ const Sidebar = () => {
                         <Link
                             key={item.name}
                             to={item.href}
+                            onClick={() => handleNavigation(item.href)}
                             className={clsx(
                                 isActive
-                                    ? 'bg-blue-50 text-blue-700 dark:bg-white/10 dark:text-white'
-                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white',
-                                'group flex items-center px-4 py-3 text-[14px] font-medium transition-all duration-200 rounded-xl'
+                                    ? 'bg-blue-50 text-blue-700 dark:bg-white/10 dark:text-white font-bold'
+                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white font-medium',
+                                'group flex items-center px-4 py-3 text-[14px] transition-all duration-200 rounded-xl'
                             )}
                         >
                             <item.icon

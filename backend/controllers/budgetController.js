@@ -136,6 +136,7 @@ export const updateBudget = async (req, res) => {
             .from('budgets')
             .update(updates)
             .eq('id', id)
+            .eq('user_id', req.user.id)
             .select()
 
         if (error) throw error
@@ -154,6 +155,7 @@ export const deleteBudget = async (req, res) => {
             .from('budgets')
             .delete()
             .eq('id', id)
+            .eq('user_id', req.user.id)
 
         if (error) throw error
 

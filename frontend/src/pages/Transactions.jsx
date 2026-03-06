@@ -47,39 +47,14 @@ const Transactions = () => {
         setIsSubmitting(true);
 
         try {
-            // 1. Check or create category map dynamically if we must
-            const { data: existingCat } = await supabase
-                .from('categories')
-                .select('id')
-                .eq('user_id', user.id)
-                .eq('name', category)
-                .eq('type', type)
-                .single();
-
-            let targetCategoryId = existingCat?.id;
-
-            if (!targetCategoryId) {
-                const { data: newCat } = await supabase
-                    .from('categories')
-                    .insert([{ user_id: user.id, name: category, type }])
-                    .select()
-                    .single();
-                if (newCat) targetCategoryId = newCat.id;
-            }
-
-            // 2. Insert transaction directly via Supabase Client
-            const { error: txError } = await supabase
-                .from('transactions')
-                .insert([{
-                    description,
-                    amount: parseFloat(amount),
-                    category_id: targetCategoryId,
-                    date,
-                    type,
-                    user_id: user.id
-                }]);
-
-            if (txError) throw txError;
+            // Create transaction via backend API
+            await transactionService.createTransaction({
+                description,
+                amount: parseFloat(amount),
+                category, // The backend handles category creation/mapping
+                date,
+                type
+            });
 
             // Reset form
             setDescription('');
@@ -108,14 +83,14 @@ const Transactions = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">Transactions</h2>
                     <p className="text-slate-500 dark:text-gray-400 text-sm">Review your income and expense history.</p>
                 </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                    className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-blue-500/20"
                 >
                     <Plus className="w-4 h-4" />
                     New Transaction
@@ -248,7 +223,8 @@ const Transactions = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+// Replace only the parts modified
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-slate-700 dark:text-gray-300">Category</label>
                                     <select

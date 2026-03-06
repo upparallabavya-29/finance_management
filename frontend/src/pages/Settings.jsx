@@ -34,56 +34,65 @@ const Settings = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 shadow rounded-lg p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
             {/* Toast Notification */}
             {showToast && (
-                <div className="absolute top-4 right-4 bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-lg font-medium text-sm animate-in fade-in slide-in-from-top-4 z-50">
+                <div className="fixed top-4 right-4 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20 font-bold text-sm animate-in fade-in slide-in-from-top-4 z-50 flex items-center gap-2 transition-all">
                     Settings saved successfully!
                 </div>
             )}
 
-            <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Settings</h2>
-            <div className="space-y-6">
-                <div>
-                    <h3 className="text-lg font-medium text-slate-700 dark:text-gray-300 border-b dark:border-white/10 pb-2 mb-4">Profile Preferences</h3>
-                    <p className="text-slate-500 dark:text-gray-400 mb-4 text-sm">Update your personal details and app preferences here.</p>
+            <div>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">Settings</h2>
+                <p className="text-slate-500 dark:text-gray-400 text-sm">Update your personal details and app preferences.</p>
+            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300">Theme</label>
-                            <select
-                                value={theme}
-                                onChange={(e) => setTheme(e.target.value)}
-                                className="w-full border dark:border-white/10 rounded-lg p-2.5 text-slate-700 dark:text-white bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
-                            >
-                                <option value="System">System (Default)</option>
-                                <option value="Light Mode">Light Mode</option>
-                                <option value="Dark Mode">Dark Mode</option>
-                            </select>
+            <div className="glass-card rounded-[24px] p-6 md:p-8">
+                <div className="space-y-6">
+                    <div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-100 dark:border-white/5 pb-4">Profile Preferences</h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-gray-300">Theme</label>
+                                <select
+                                    value={theme}
+                                    onChange={(e) => setTheme(e.target.value)}
+                                    className="w-full border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium cursor-pointer"
+                                    style={{ WebkitAppearance: 'none' }}
+                                >
+                                    <option value="System">System (Default)</option>
+                                    <option value="Light Mode">Light Mode</option>
+                                    <option value="Dark Mode">Dark Mode</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-gray-300">Currency</label>
+                                <select
+                                    value={currency}
+                                    onChange={(e) => setCurrency(e.target.value)}
+                                    className="w-full border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium cursor-pointer"
+                                    style={{ WebkitAppearance: 'none' }}
+                                >
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="GBP">GBP (£)</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-slate-600 dark:text-gray-300">Currency</label>
-                            <select
-                                value={currency}
-                                onChange={(e) => setCurrency(e.target.value)}
-                                className="w-full border dark:border-white/10 rounded-lg p-2.5 text-slate-700 dark:text-white bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+
+                        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-white/5 flex justify-start">
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2 disabled:opacity-70 disabled:hover:bg-blue-600 min-w-[150px] justify-center"
                             >
-                                <option value="USD">USD ($)</option>
-                                <option value="EUR">EUR (€)</option>
-                                <option value="GBP">GBP (£)</option>
-                            </select>
+                                {isSaving ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                ) : 'Save Changes'}
+                            </button>
                         </div>
                     </div>
-
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="mt-6 bg-blue-600 text-white px-6 py-2.5 text-sm font-bold rounded-lg hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center min-w-[140px]"
-                    >
-                        {isSaving ? (
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        ) : 'Save Changes'}
-                    </button>
                 </div>
             </div>
         </div>

@@ -131,22 +131,17 @@ const Dashboard = () => {
     const loadData = async () => {
         try {
             const [txRes, budgetRes] = await Promise.all([
-                supabase
-                    .from("transactions")
-                    .select("*")
-                    .order("date", { ascending: false }),
+                transactionService.getTransactions().catch(e => {
+                    console.error('Error fetching transactions:', e);
+                    return { data: { data: [] } };
+                }),
                 budgetService.getBudgets().catch(e => {
                     console.error('Error fetching budgets:', e);
                     return { data: { data: [] } };
                 })
             ]);
 
-            if (txRes.error) {
-                console.error("Error fetching transactions:", txRes.error);
-                setTransactions([]);
-            } else {
-                setTransactions(txRes.data || []);
-            }
+            setTransactions(txRes.data?.data || []);
 
             console.log('[Dashboard DEBUG] budgetRes:', budgetRes?.data);
             setBudgets(budgetRes.data?.data || []);
@@ -184,10 +179,13 @@ const Dashboard = () => {
         { name: 'Jan', income: 0, expense: 0 }, { name: 'Feb', income: 0, expense: 0 }
     ];
 
-    const categoryColors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const categoryColors = ['#f43f5e', '#f97316', '#eab308', '#8b5cf6', '#ec4899', '#14b8a6', '#3b82f6'];
     const catDataMap = transactions.filter(t => t.type === 'expense').reduce((acc, t) => {
-        const catName = t.category_id ? 'Categorized Expense' : 'Unknown';
-        acc[catName] = (acc[catName] || 0) + parseFloat(t.amount);
+        // Handle properly populated categories from backend, or fallback to 'Uncategorized'
+        const catName = t.categories?.name || t.category_id || 'Uncategorized';
+        // Capitalize category name for display
+        const displayCatName = catName.charAt(0).toUpperCase() + catName.slice(1);
+        acc[displayCatName] = (acc[displayCatName] || 0) + parseFloat(t.amount);
         return acc;
     }, {});
 
@@ -195,8 +193,17 @@ const Dashboard = () => {
         name, value, color: categoryColors[idx % categoryColors.length]
     }));
 
+    if (totalIncome > 0 && netSavings > 0) {
+        // Inject Remaining Balance
+        categoryData.push({
+            name: 'Remaining Balance',
+            value: netSavings,
+            color: '#10b981' // Green for balance
+        });
+    }
+
     if (categoryData.length === 0) {
-        categoryData.push({ name: 'No Expenses', value: 100, color: '#94a3b8' });
+        categoryData.push({ name: 'No Data', value: 100, color: '#94a3b8' });
     }
 
     const budgetData = budgets.map(b => ({
@@ -234,21 +241,21 @@ const Dashboard = () => {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Page Header */}
-            <div className="flex justify-between items-end">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                         Welcome, {user?.firstName ? `${user.firstName} ${user.lastName}` : (user?.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'User')}
                     </h1>
-                    <p className="text-slate-500 dark:text-gray-400 text-sm mt-1">Manage your wealth and track your financial growth.</p>
+                    <p className="text-slate-500 dark:text-gray-400 text-sm mt-1 sm:mt-2">Manage your wealth and track your financial growth.</p>
                 </div>
-                <div className="flex gap-3">
-                    <button className="glass px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white flex items-center gap-2 transition-all">
+                <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                    <button className="flex-1 sm:flex-none glass px-4 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white flex justify-center items-center gap-2 transition-all">
                         <Calendar className="w-4 h-4" />
                         Custom Date
                     </button>
                     <button
                         onClick={() => navigate('/transactions')}
-                        className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-xl text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2"
+                        className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-xl text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all flex justify-center items-center gap-2"
                     >
                         + New Entry
                     </button>
@@ -319,7 +326,7 @@ const Dashboard = () => {
                 {/* Pie Chart Card */}
                 <div className="lg:col-span-4">
                     <div className="bg-white dark:bg-slate-900 rounded-[24px] p-6 h-full border border-slate-100 dark:border-white/5 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Expense Breakdown</h3>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Income Allocation</h3>
                         <div className="flex items-center gap-6">
                             {/* Donut Chart */}
                             <div className="flex-shrink-0">
@@ -339,7 +346,7 @@ const Dashboard = () => {
                                         </Pie>
                                         <Tooltip
                                             contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '12px' }}
-                                            formatter={(value, name) => [`${value.toFixed(2)}`, name]}
+                                            formatter={(value, name) => [`${parseFloat(value).toFixed(2)}`, name]}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
@@ -348,7 +355,7 @@ const Dashboard = () => {
                             {/* Legend — 2-column grid with percentages */}
                             <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-3">
                                 {categoryData
-                                    .filter(c => c.name !== 'No Expenses')
+                                    .filter(c => c.name !== 'No Data')
                                     .map((c, i) => {
                                         const total = categoryData.reduce((sum, d) => sum + d.value, 0);
                                         const pct = total > 0 ? ((c.value / total) * 100).toFixed(0) : 0;
@@ -361,8 +368,8 @@ const Dashboard = () => {
                                         );
                                     })
                                 }
-                                {categoryData.length === 1 && categoryData[0].name === 'No Expenses' && (
-                                    <p className="col-span-2 text-xs text-slate-400 text-center pt-2">No expense data yet.</p>
+                                {categoryData.length === 1 && categoryData[0].name === 'No Data' && (
+                                    <p className="col-span-2 text-xs text-slate-400 text-center pt-2">No income or expense data yet.</p>
                                 )}
                             </div>
                         </div>

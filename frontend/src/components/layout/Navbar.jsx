@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, ChevronDown, User, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { Search, Bell, ChevronDown, User, Settings as SettingsIcon, LogOut, Menu } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -27,19 +27,28 @@ const Navbar = () => {
     };
 
     return (
-        <div className="relative z-50 h-20 flex items-center justify-between px-8 bg-transparent border-b border-slate-200 dark:border-white/5 backdrop-blur-sm">
-            {/* Search Bar */}
-            <div className="flex-1 max-w-md">
-                <div className="relative group">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500 group-focus-within:text-blue-500 transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Search transactions, budgets..."
-                        className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2 pl-11 pr-4 text-sm text-slate-800 dark:text-gray-200 placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/20 transition-all font-medium"
-                    />
+        <div className="relative z-40 h-16 sm:h-20 flex items-center justify-between px-4 sm:px-8 bg-transparent border-b border-slate-200 dark:border-white/5 backdrop-blur-sm">
+            <div className="flex items-center gap-3">
+                {/* Mobile Menu Button */}
+                <button
+                    onClick={onMenuClick}
+                    className="p-2 -ml-2 text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white lg:hidden"
+                >
+                    <Menu className="w-6 h-6" />
+                </button>
+
+                {/* Search Bar - Hidden on small mobile, visible on sm and up */}
+                <div className="hidden sm:block flex-1 max-w-md">
+                    <div className="relative group">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Search transactions, budgets..."
+                            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl py-2 pl-11 pr-4 text-sm text-slate-800 dark:text-gray-200 placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/20 transition-all font-medium"
+                        />
+                    </div>
                 </div>
             </div>
-
             {/* Right side Actions */}
             <div className="flex items-center gap-6">
                 {/* Notification */}
