@@ -16,6 +16,7 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
     try {
+        console.log(`[LOGIN ATTEMPT] Email: "${req.body.email}", Password size: ${req.body.password?.length}`);
         const result = await authService.loginUser(req.body);
         res.status(200).json({
             success: true,

@@ -8,7 +8,7 @@ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, serviceKey);
 
 async function resetPassword() {
-    const email = 'bhavyabhavyareddy4@gmail.com';
+    const email = 'bavyaupparalla@gmail.com';
     const newPassword = 'password123';
 
     // Get user ID first
