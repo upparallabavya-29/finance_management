@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { transactionService } from '../services/api';
+import {
+    transactionService,
+    categoryService
+} from '../services/api';
+import { exportToCSV } from '../utils/exportUtils';
 import { useAuth } from '../context/AuthContext';
-import { Plus, ArrowUpRight, ArrowDownRight, Wallet } from 'lucide-react';
+import {
+    Search,
+    Filter,
+    Download,
+    Plus,
+    Trash2,
+    ArrowUpRight,
+    ArrowDownRight,
+    ChevronLeft,
+    ChevronRight,
+    Calendar,
+    Tag,
+    Wallet
+} from 'lucide-react';
 
 const Transactions = () => {
     const { user } = useAuth();
@@ -88,13 +105,22 @@ const Transactions = () => {
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">Transactions</h2>
                     <p className="text-slate-500 dark:text-gray-400 text-sm">Review your income and expense history.</p>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-blue-500/20"
-                >
-                    <Plus className="w-4 h-4" />
-                    New Transaction
-                </button>
+                <div className="flex gap-3 w-full sm:w-auto">
+                    <button
+                        onClick={() => exportToCSV(transactions, 'transactions_report')}
+                        className="flex justify-center items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm"
+                    >
+                        <Download className="w-4 h-4" />
+                        Export CSV
+                    </button>
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-lg shadow-blue-500/20"
+                    >
+                        <Plus className="w-4 h-4" />
+                        New Transaction
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white dark:bg-slate-900 shadow rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">

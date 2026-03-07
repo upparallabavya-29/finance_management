@@ -18,7 +18,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { transactionService, budgetService } from '../services/api';
+import { transactionService, budgetService, savingsService, billService, debtService, investmentService } from '../services/api';
 import { supabase } from '../services/supabase';
 
 // Summary Card Component
@@ -126,17 +126,37 @@ const Dashboard = () => {
 
     const [transactions, setTransactions] = useState([]);
     const [budgets, setBudgets] = useState([]);
+    const [goals, setGoals] = useState([]);
+    const [bills, setBills] = useState([]);
+    const [debts, setDebts] = useState([]);
+    const [investments, setInvestments] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
         try {
-            const [txRes, budgetRes] = await Promise.all([
+            const [txRes, budgetRes, goalsRes, billsRes, debtRes, invRes] = await Promise.all([
                 transactionService.getTransactions().catch(e => {
                     console.error('Error fetching transactions:', e);
                     return { data: { data: [] } };
                 }),
                 budgetService.getBudgets().catch(e => {
                     console.error('Error fetching budgets:', e);
+                    return { data: { data: [] } };
+                }),
+                savingsService.getGoals().catch(e => {
+                    console.error('Error fetching goals:', e);
+                    return { data: { data: [] } };
+                }),
+                billService.getBills().catch(e => {
+                    console.error('Error fetching bills:', e);
+                    return { data: { data: [] } };
+                }),
+                debtService.getDebts().catch(e => {
+                    console.error('Error fetching debts:', e);
+                    return { data: { data: [] } };
+                }),
+                investmentService.getInvestments().catch(e => {
+                    console.error('Error fetching investments:', e);
                     return { data: { data: [] } };
                 })
             ]);
@@ -145,6 +165,10 @@ const Dashboard = () => {
 
             console.log('[Dashboard DEBUG] budgetRes:', budgetRes?.data);
             setBudgets(budgetRes.data?.data || []);
+            setGoals(goalsRes.data?.data || []);
+            setBills(billsRes.data?.data || []);
+            setDebts(debtRes.data?.data || []);
+            setInvestments(invRes.data?.data || []);
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         } finally {
@@ -160,11 +184,16 @@ const Dashboard = () => {
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
     const netSavings = totalIncome - totalExpenses;
 
+    const totalPortfolioValue = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.current_price || 0)), 0);
+    const totalInvested = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.purchase_price || 0)), 0);
+    const portfolioPL = totalPortfolioValue - totalInvested;
+    const portfolioPLPct = totalInvested > 0 ? ((portfolioPL / totalInvested) * 100).toFixed(1) : '0.0';
+
     const summaries = [
-        { title: 'Total Income', amount: totalIncome.toFixed(2), change: '+0.0%', icon: ArrowUpRight, color: 'text-emerald-400', glowColor: '#10b981' },
-        { title: 'Total Expenses', amount: totalExpenses.toFixed(2), change: '-0.0%', icon: ArrowDownRight, color: 'text-rose-400', glowColor: '#ef4444' },
-        { title: 'Net Savings', amount: netSavings.toFixed(2), change: '+0.0%', icon: Wallet, color: 'text-blue-400', glowColor: '#3b82f6' },
-        { title: 'Portfolio Value', amount: '0.00', change: '+0.0%', icon: TrendingUp, color: 'text-purple-400', glowColor: '#8b5cf6' },
+        { title: 'Total Income', amount: totalIncome.toLocaleString(), change: '+0.0%', icon: ArrowUpRight, color: 'text-emerald-400', glowColor: '#10b981' },
+        { title: 'Total Expenses', amount: totalExpenses.toLocaleString(), change: '-0.0%', icon: ArrowDownRight, color: 'text-rose-400', glowColor: '#ef4444' },
+        { title: 'Net Savings', amount: netSavings.toLocaleString(), change: '+0.0%', icon: Wallet, color: 'text-blue-400', glowColor: '#3b82f6' },
+        { title: 'Portfolio Value', amount: totalPortfolioValue.toLocaleString(), change: `${portfolioPL >= 0 ? '+' : ''}${portfolioPLPct}%`, icon: TrendingUp, color: 'text-purple-400', glowColor: '#8b5cf6' },
     ];
 
     // Compute basic trend purely based on existing transactions
@@ -321,6 +350,125 @@ const Dashboard = () => {
                             </BarChart>
                         </ResponsiveContainer>
                     </ChartWrapper>
+                </div>
+
+                {/* Debt Summary Card */}
+                <div className="lg:col-span-8">
+                    <div className="bg-white dark:bg-slate-900 rounded-[24px] p-6 border border-slate-100 dark:border-white/5 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Landmark size={20} className="text-slate-500" />
+                                Active Debts
+                            </h3>
+                            <button onClick={() => navigate('/debts')} className="text-sm font-semibold text-slate-600 dark:text-slate-400 hover:underline">Manage Debts</button>
+                        </div>
+
+                        {debts.length === 0 ? (
+                            <div className="py-8 text-center text-slate-500 dark:text-slate-400">
+                                You are currently debt-free. Keep it up!
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {debts.slice(0, 4).map(debt => {
+                                    const progress = Math.min(Math.round(((debt.total_amount - debt.balance) / debt.total_amount) * 100), 100);
+                                    return (
+                                        <div key={debt.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 space-y-3 border border-slate-100 dark:border-white/5">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <span className="font-bold text-slate-900 dark:text-white block">{debt.title}</span>
+                                                    <span className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md uppercase font-bold">{debt.interest_rate}% Interest</span>
+                                                </div>
+                                                <span className="text-slate-900 dark:text-white font-bold">₹{debt.balance.toLocaleString()}</span>
+                                            </div>
+                                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-slate-900 dark:bg-white transition-all duration-1000"
+                                                    style={{ width: `${progress}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Upcoming Bills Card */}
+                <div className="lg:col-span-12">
+                    <div className="bg-white dark:bg-slate-900 rounded-[24px] p-6 border border-slate-100 dark:border-white/5 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <ReceiptText size={20} className="text-rose-500" />
+                                Upcoming Bills
+                            </h3>
+                            <button onClick={() => navigate('/bills')} className="text-sm font-semibold text-rose-600 dark:text-rose-400 hover:underline">View All</button>
+                        </div>
+
+                        {bills.filter(b => b.status === 'pending').length === 0 ? (
+                            <div className="py-8 text-center text-slate-500 dark:text-slate-400">
+                                All caught up! No pending bills.
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {bills.filter(b => b.status === 'pending').slice(0, 4).map(bill => (
+                                    <div key={bill.id} className="p-4 rounded-2xl bg-rose-50/50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 space-y-2">
+                                        <div className="flex justify-between items-start">
+                                            <span className="font-bold text-slate-900 dark:text-white truncate">{bill.title}</span>
+                                            <span className="text-rose-600 dark:text-rose-400 font-bold">₹{bill.amount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                            <Calendar size={12} />
+                                            <span>Due: {new Date(bill.due_date).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Savings Goals Card */}
+                <div className="lg:col-span-12">
+                    <div className="bg-white dark:bg-slate-900 rounded-[24px] p-6 border border-slate-100 dark:border-white/5 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Target size={20} className="text-indigo-500" />
+                                Savings Goals
+                            </h3>
+                            <button className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">View All</button>
+                        </div>
+
+                        {goals.length === 0 ? (
+                            <div className="py-8 text-center text-slate-500 dark:text-slate-400">
+                                No savings goals set. Start planning for your future today!
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {goals.slice(0, 3).map(goal => {
+                                    const progress = Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100);
+                                    return (
+                                        <div key={goal.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 space-y-3">
+                                            <div className="flex justify-between items-start">
+                                                <span className="font-bold text-slate-900 dark:text-white truncate">{goal.title}</span>
+                                                <span className="text-indigo-600 dark:text-indigo-400 font-bold">{progress}%</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-indigo-500 transition-all duration-1000"
+                                                    style={{ width: `${progress}%` }}
+                                                ></div>
+                                            </div>
+                                            <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                                                <span>₹{goal.current_amount.toLocaleString()}</span>
+                                                <span>Target: ₹{goal.target_amount.toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Pie Chart Card */}

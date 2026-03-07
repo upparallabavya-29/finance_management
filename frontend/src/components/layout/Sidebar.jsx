@@ -2,16 +2,15 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
-    ArrowUpRight,
+    ReceiptText,
     PieChart,
-    Target,
-    CircleDollarSign,
-    TrendingUp,
-    FileBarChart,
     Settings,
     LogOut,
-    Wallet,
-    X
+    X,
+    Target,
+    Landmark,
+    Briefcase,
+    Lightbulb
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
@@ -31,10 +30,15 @@ const Sidebar = ({ onClose }) => {
     };
 
     const navigation = [
-        { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-        { name: 'Income & Expenses', href: '/transactions', icon: ArrowUpRight },
-        { name: 'Budgets', href: '/budgets', icon: PieChart },
-        { name: 'Settings', href: '/settings', icon: Settings },
+        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+        { label: 'Income & Expenses', path: '/transactions', icon: ArrowUpRight },
+        { label: 'Budgets', path: '/budgets', icon: PieChart },
+        { label: 'Insights', path: '/insights', icon: Lightbulb }, // Added Insights item
+        { label: 'Goals', path: '/goals', icon: Target },
+        { label: 'Bills', path: '/bills', icon: ReceiptText },
+        { label: 'Debts', path: '/debts', icon: Landmark },
+        { label: 'Investments', path: '/investments', icon: Briefcase }, // Added Investments item
+        { label: 'Settings', path: '/settings', icon: Settings },
     ];
 
     return (

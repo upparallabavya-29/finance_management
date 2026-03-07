@@ -39,4 +39,36 @@ export const budgetService = {
     deleteBudget: (id) => api.delete(`/budgets/${id}`)
 }
 
+export const savingsService = {
+    getGoals: () => api.get('/goals'),
+    createGoal: (data) => api.post('/goals', data),
+    updateGoal: (id, data) => api.put(`/goals/${id}`, data),
+    deleteGoal: (id) => api.delete(`/goals/${id}`)
+}
+
+export const billService = {
+    getBills: () => api.get('/bills'),
+    createBill: (data) => api.post('/bills', data),
+    updateBill: (id, data) => api.put(`/bills/${id}`, data),
+    deleteBill: (id) => api.delete(`/bills/${id}`)
+}
+
+export const debtService = {
+    getDebts: () => api.get('/debts'),
+    createDebt: (data) => api.post('/debts', data),
+    updateDebt: (id, data) => api.put(`/debts/${id}`, data),
+    deleteDebt: (id) => api.delete(`/debts/${id}`)
+}
+
+export const investmentService = {
+    getInvestments: () => api.get('/investments'),
+    createInvestment: (data) => api.post('/investments', data),
+    updateInvestment: (id, data) => api.put(`/investments/${id}`, data),
+    deleteInvestment: (id) => api.delete(`/investments/${id}`)
+}
+
+export const insightService = {
+    getOverview: () => api.get('/insights')
+}
+
 export default api

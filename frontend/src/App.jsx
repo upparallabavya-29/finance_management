@@ -4,6 +4,11 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Budgets from './pages/Budgets'
+import Goals from './pages/Goals'
+import Bills from './pages/Bills'
+import Debts from './pages/Debts'
+import Investments from './pages/Investments';
+import Insights from './pages/Insights';
 import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -54,6 +59,11 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/transactions" element={<Transactions />} />
                   <Route path="/budgets" element={<Budgets />} />
+                  <Route path="/goals" element={<Goals />} />
+                  <Route path="/bills" element={<Bills />} />
+                  <Route path="/debts" element={<Debts />} />
+                  <Route path="/investments" element={<Investments />} />
+                  <Route path="/insights" element={<Insights />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
