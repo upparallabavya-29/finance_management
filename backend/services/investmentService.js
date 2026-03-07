@@ -19,13 +19,10 @@ class InvestmentService {
         const data = {
             user_id: userId,
             name,
-            title: name, // Resilient mapping
             type,
             quantity: parseFloat(quantity),
             purchase_price: parseFloat(purchase_price),
-            target_amount: parseFloat(purchase_price), // Resilient mapping
-            current_value: parseFloat(current_value),
-            current_amount: parseFloat(current_value) // Resilient mapping
+            current_value: parseFloat(current_value)
         };
 
         return await investmentRepository.create(data);

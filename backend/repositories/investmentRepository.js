@@ -23,12 +23,14 @@ class InvestmentRepository {
     }
 
     async create(investmentData) {
-        // Map to actual DB columns found in discovery
+        // Map to actual DB columns found in migrations
         const mappedData = {
             user_id: investmentData.user_id,
-            title: investmentData.name || investmentData.title,
-            target_amount: investmentData.purchase_price || investmentData.target_amount,
-            current_amount: investmentData.current_value || investmentData.current_amount || investmentData.purchase_price
+            name: investmentData.name,
+            type: investmentData.type || 'Other',
+            purchase_price: investmentData.purchase_price,
+            quantity: investmentData.quantity || 1,
+            current_value: investmentData.current_value
         };
 
         const { data, error } = await supabase
@@ -41,9 +43,11 @@ class InvestmentRepository {
 
     async update(id, userId, updates) {
         const mappedUpdates = {};
-        if (updates.name || updates.title) mappedUpdates.title = updates.name || updates.title;
-        if (updates.purchase_price || updates.target_amount) mappedUpdates.target_amount = updates.purchase_price || updates.target_amount;
-        if (updates.current_value || updates.current_amount) mappedUpdates.current_amount = updates.current_value || updates.current_amount;
+        if (updates.name) mappedUpdates.name = updates.name;
+        if (updates.type) mappedUpdates.type = updates.type;
+        if (updates.purchase_price) mappedUpdates.purchase_price = updates.purchase_price;
+        if (updates.quantity) mappedUpdates.quantity = updates.quantity;
+        if (updates.current_value) mappedUpdates.current_value = updates.current_value;
 
         const { data, error } = await supabase
             .from('investments')
