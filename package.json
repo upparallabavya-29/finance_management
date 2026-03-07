@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:all": "cd backend && npm install && cd ../frontend && npm install && npm run build && cd ../backend && npm start",
     "lint": "eslint"
   },
   "dependencies": {

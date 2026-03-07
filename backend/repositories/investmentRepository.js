@@ -6,7 +6,7 @@ class InvestmentRepository {
             .from('investments')
             .select('*')
             .eq('user_id', userId)
-            .order('purchase_date', { ascending: false });
+            .order('created_at', { ascending: false });
         if (error) throw error;
         return data || [];
     }
@@ -23,18 +23,31 @@ class InvestmentRepository {
     }
 
     async create(investmentData) {
+        // Map to actual DB columns found in discovery
+        const mappedData = {
+            user_id: investmentData.user_id,
+            title: investmentData.name || investmentData.title,
+            target_amount: investmentData.purchase_price || investmentData.target_amount,
+            current_amount: investmentData.current_value || investmentData.current_amount || investmentData.purchase_price
+        };
+
         const { data, error } = await supabase
             .from('investments')
-            .insert([investmentData])
+            .insert([mappedData])
             .select();
         if (error) throw error;
-        return data[0];
+        return data ? data[0] : null;
     }
 
     async update(id, userId, updates) {
+        const mappedUpdates = {};
+        if (updates.name || updates.title) mappedUpdates.title = updates.name || updates.title;
+        if (updates.purchase_price || updates.target_amount) mappedUpdates.target_amount = updates.purchase_price || updates.target_amount;
+        if (updates.current_value || updates.current_amount) mappedUpdates.current_amount = updates.current_value || updates.current_amount;
+
         const { data, error } = await supabase
             .from('investments')
-            .update(updates)
+            .update(mappedUpdates)
             .eq('id', id)
             .eq('user_id', userId)
             .select();

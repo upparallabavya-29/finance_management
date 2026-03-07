@@ -6,20 +6,26 @@ class InvestmentService {
     }
 
     async createInvestment(userId, investmentData) {
-        const { asset_name, asset_type, quantity, purchase_price, current_price, purchase_date } = investmentData;
+        const name = investmentData.name || investmentData.title;
+        const type = investmentData.type || 'Other';
+        const quantity = investmentData.quantity || 1;
+        const purchase_price = investmentData.purchase_price || investmentData.target_amount;
+        const current_value = investmentData.current_value || investmentData.current_amount || purchase_price;
 
-        if (!asset_name || !asset_type || !quantity || !purchase_price) {
-            throw Object.assign(new Error('Asset name, type, quantity and purchase price are required'), { statusCode: 400 });
+        if (!name || !purchase_price) {
+            throw Object.assign(new Error('Asset name (name) and purchase price are required'), { statusCode: 400 });
         }
 
         const data = {
             user_id: userId,
-            asset_name,
-            asset_type,
+            name,
+            title: name, // Resilient mapping
+            type,
             quantity: parseFloat(quantity),
             purchase_price: parseFloat(purchase_price),
-            current_price: parseFloat(current_price || purchase_price),
-            purchase_date: purchase_date || new Date().toISOString()
+            target_amount: parseFloat(purchase_price), // Resilient mapping
+            current_value: parseFloat(current_value),
+            current_amount: parseFloat(current_value) // Resilient mapping
         };
 
         return await investmentRepository.create(data);
@@ -27,12 +33,11 @@ class InvestmentService {
 
     async updateInvestment(id, userId, updates) {
         const sanitized = {};
-        if (updates.asset_name !== undefined) sanitized.asset_name = updates.asset_name;
-        if (updates.asset_type !== undefined) sanitized.asset_type = updates.asset_type;
+        if (updates.name !== undefined) sanitized.name = updates.name;
+        if (updates.type !== undefined) sanitized.type = updates.type;
         if (updates.quantity !== undefined) sanitized.quantity = parseFloat(updates.quantity);
         if (updates.purchase_price !== undefined) sanitized.purchase_price = parseFloat(updates.purchase_price);
-        if (updates.current_price !== undefined) sanitized.current_price = parseFloat(updates.current_price);
-        if (updates.purchase_date !== undefined) sanitized.purchase_date = updates.purchase_date;
+        if (updates.current_value !== undefined) sanitized.current_value = parseFloat(updates.current_value);
 
         const investment = await investmentRepository.update(id, userId, sanitized);
         if (!investment) throw Object.assign(new Error('Investment not found or not authorized'), { statusCode: 404 });

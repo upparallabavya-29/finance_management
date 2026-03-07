@@ -10,7 +10,9 @@ import {
     Target,
     Landmark,
     Briefcase,
-    Lightbulb
+    Lightbulb,
+    ArrowUpRight,
+    Wallet
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../../context/AuthContext';
@@ -66,12 +68,12 @@ const Sidebar = ({ onClose }) => {
             {/* Navigation */}
             <div className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
                 {navigation.map((item) => {
-                    const isActive = location.pathname === item.href;
+                    const isActive = location.pathname === item.path;
                     return (
                         <Link
-                            key={item.name}
-                            to={item.href}
-                            onClick={() => handleNavigation(item.href)}
+                            key={item.label}
+                            to={item.path}
+                            onClick={() => handleNavigation(item.path)}
                             className={clsx(
                                 isActive
                                     ? 'bg-blue-50 text-blue-700 dark:bg-white/10 dark:text-white font-bold'
@@ -85,7 +87,7 @@ const Sidebar = ({ onClose }) => {
                                     'mr-3.5 h-[18px] w-[18px] shrink-0 transition-colors duration-200'
                                 )}
                             />
-                            {item.name}
+                            {item.label}
                         </Link>
                     );
                 })}

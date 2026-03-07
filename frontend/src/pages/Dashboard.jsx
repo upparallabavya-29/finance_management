@@ -15,7 +15,9 @@ import {
     Target,
     MoreVertical,
     Calendar,
-    ArrowRight
+    ArrowRight,
+    Landmark,
+    ReceiptText
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { transactionService, budgetService, savingsService, billService, debtService, investmentService } from '../services/api';
@@ -134,41 +136,37 @@ const Dashboard = () => {
 
     const loadData = async () => {
         try {
-            const [txRes, budgetRes, goalsRes, billsRes, debtRes, invRes] = await Promise.all([
-                transactionService.getTransactions().catch(e => {
-                    console.error('Error fetching transactions:', e);
-                    return { data: { data: [] } };
-                }),
-                budgetService.getBudgets().catch(e => {
-                    console.error('Error fetching budgets:', e);
-                    return { data: { data: [] } };
-                }),
-                savingsService.getGoals().catch(e => {
-                    console.error('Error fetching goals:', e);
-                    return { data: { data: [] } };
-                }),
-                billService.getBills().catch(e => {
-                    console.error('Error fetching bills:', e);
-                    return { data: { data: [] } };
-                }),
-                debtService.getDebts().catch(e => {
-                    console.error('Error fetching debts:', e);
-                    return { data: { data: [] } };
-                }),
-                investmentService.getInvestments().catch(e => {
-                    console.error('Error fetching investments:', e);
-                    return { data: { data: [] } };
-                })
+            setLoading(true);
+            const results = await Promise.allSettled([
+                transactionService.getTransactions(),
+                budgetService.getBudgets(),
+                savingsService.getGoals(),
+                billService.getBills(),
+                debtService.getDebts(),
+                investmentService.getInvestments()
             ]);
 
-            setTransactions(txRes.data?.data || []);
+            const [transRes, budgetRes, goalRes, billRes, debtRes, invRes] = results;
 
-            console.log('[Dashboard DEBUG] budgetRes:', budgetRes?.data);
-            setBudgets(budgetRes.data?.data || []);
-            setGoals(goalsRes.data?.data || []);
-            setBills(billsRes.data?.data || []);
-            setDebts(debtRes.data?.data || []);
-            setInvestments(invRes.data?.data || []);
+            if (transRes.status === 'fulfilled') setTransactions(transRes.value.data?.data || []);
+            else console.error('Error fetching transactions:', transRes.reason);
+
+            if (budgetRes.status === 'fulfilled') {
+                setBudgets(budgetRes.value.data?.data || []);
+            } else console.error('Error fetching budgets:', budgetRes.reason);
+
+            if (goalRes.status === 'fulfilled') setGoals(goalRes.value.data?.data || []);
+            else console.error('Error fetching goals:', goalRes.reason);
+
+            if (billRes.status === 'fulfilled') setBills(billRes.value.data?.data || []);
+            else console.error('Error fetching bills:', billRes.reason);
+
+            if (debtRes.status === 'fulfilled') setDebts(debtRes.value.data?.data || []);
+            else console.error('Error fetching debts:', debtRes.reason);
+
+            if (invRes.status === 'fulfilled') setInvestments(invRes.value.data?.data || []);
+            else console.error('Error fetching investments:', invRes.reason);
+
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         } finally {
@@ -184,7 +182,7 @@ const Dashboard = () => {
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
     const netSavings = totalIncome - totalExpenses;
 
-    const totalPortfolioValue = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.current_price || 0)), 0);
+    const totalPortfolioValue = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.current_value || 0)), 0);
     const totalInvested = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.purchase_price || 0)), 0);
     const portfolioPL = totalPortfolioValue - totalInvested;
     const portfolioPLPct = totalInvested > 0 ? ((portfolioPL / totalInvested) * 100).toFixed(1) : '0.0';
