@@ -67,3 +67,4 @@
 {"level":"error","message":"Could not find the 'title' column of 'debts' in the schema cache - /api/debts - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:54:57"}
 {"level":"error","message":"Could not find the 'name' column of 'investments' in the schema cache - /api/investments - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 12:03:32"}
 {"level":"error","message":"Could not find the 'name' column of 'investments' in the schema cache - /api/investments - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 12:03:33"}
+{"level":"error","message":"Could not find the 'name' column of 'investments' in the schema cache - /api/investments - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 12:10:03"}
