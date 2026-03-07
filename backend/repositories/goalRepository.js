@@ -8,7 +8,7 @@ class GoalRepository {
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
         if (error) throw error;
-        return data || [];
+        return (data || []).map(g => ({ ...g, title: g.name }));
     }
 
     async findById(id, userId) {
@@ -19,7 +19,7 @@ class GoalRepository {
             .eq('user_id', userId)
             .single();
         if (error) throw error;
-        return data;
+        return data ? { ...data, title: data.name } : null;
     }
 
     async create(goalData) {
@@ -28,7 +28,8 @@ class GoalRepository {
             .insert([goalData])
             .select();
         if (error) throw error;
-        return data[0];
+        if (error) throw error;
+        return { ...data[0], title: data[0].name };
     }
 
     async update(id, userId, updates) {
@@ -39,7 +40,8 @@ class GoalRepository {
             .eq('user_id', userId)
             .select();
         if (error) throw error;
-        return data && data.length > 0 ? data[0] : null;
+        if (error) throw error;
+        return data && data.length > 0 ? { ...data[0], title: data[0].name } : null;
     }
 
     async delete(id, userId) {

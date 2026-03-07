@@ -85,3 +85,13 @@
 {"level":"error","message":"Could not find the 'title' column of 'savings_goals' in the schema cache - /api/goals - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:04:58"}
 {"level":"error","message":"Could not find the 'title' column of 'debts' in the schema cache - /api/debts - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:06:54"}
 {"level":"error","message":"Could not find the 'title' column of 'debts' in the schema cache - /api/debts - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:06:55"}
+{"level":"info","message":"Server is running on port 5001","service":"finance-dashboard-api","timestamp":"2026-03-07 11:43:38"}
+{"level":"info","message":"CronService starting scheduled jobs...","service":"finance-dashboard-api","timestamp":"2026-03-07 11:43:38"}
+{"level":"error","message":"Could not find the 'title' column of 'savings_goals' in the schema cache - /api/goals - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:46:13"}
+{"level":"error","message":"Could not find the 'title' column of 'savings_goals' in the schema cache - /api/goals - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:46:15"}
+{"level":"error","message":"Could not find the 'title' column of 'savings_goals' in the schema cache - /api/goals - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:46:15"}
+{"level":"info","message":"Server is running on port 5001","service":"finance-dashboard-api","timestamp":"2026-03-07 11:51:35"}
+{"level":"info","message":"CronService starting scheduled jobs...","service":"finance-dashboard-api","timestamp":"2026-03-07 11:51:35"}
+{"level":"error","message":"Could not find the 'title' column of 'debts' in the schema cache - /api/debts - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:54:55"}
+{"level":"error","message":"Could not find the 'title' column of 'debts' in the schema cache - /api/debts - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:54:57"}
+{"level":"error","message":"Could not find the 'title' column of 'debts' in the schema cache - /api/debts - POST - ::1\nStack: undefined","service":"finance-dashboard-api","timestamp":"2026-03-07 11:54:57"}

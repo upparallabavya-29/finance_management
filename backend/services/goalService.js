@@ -14,7 +14,7 @@ class GoalService {
 
         const data = {
             user_id: userId,
-            title,
+            name: title,
             target_amount: parseFloat(target_amount),
             current_amount: parseFloat(current_amount || 0),
             deadline: deadline || null
@@ -26,7 +26,7 @@ class GoalService {
     async updateGoal(id, userId, updates) {
         // Sanitize updates
         const sanitized = {};
-        if (updates.title !== undefined) sanitized.title = updates.title;
+        if (updates.title !== undefined) sanitized.name = updates.title;
         if (updates.target_amount !== undefined) sanitized.target_amount = parseFloat(updates.target_amount);
         if (updates.current_amount !== undefined) sanitized.current_amount = parseFloat(updates.current_amount);
         if (updates.deadline !== undefined) sanitized.deadline = updates.deadline;

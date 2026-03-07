@@ -14,7 +14,7 @@ class DebtService {
 
         const data = {
             user_id: userId,
-            title,
+            name: title,
             total_amount: parseFloat(total_amount),
             balance: parseFloat(balance || total_amount),
             interest_rate: parseFloat(interest_rate || 0),
@@ -26,7 +26,7 @@ class DebtService {
 
     async updateDebt(id, userId, updates) {
         const sanitized = {};
-        if (updates.title !== undefined) sanitized.title = updates.title;
+        if (updates.title !== undefined) sanitized.name = updates.title;
         if (updates.total_amount !== undefined) sanitized.total_amount = parseFloat(updates.total_amount);
         if (updates.balance !== undefined) sanitized.balance = parseFloat(updates.balance);
         if (updates.interest_rate !== undefined) sanitized.interest_rate = parseFloat(updates.interest_rate);
