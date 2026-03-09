@@ -28,11 +28,11 @@ const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHi
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="glass-card rounded-[24px] p-6 relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300">
+        <div className="glass-card rounded-[32px] p-8 relative overflow-hidden group hover:bg-white/[0.04] transition-all duration-300 min-h-[200px] flex flex-col justify-center">
             <div className={`absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-20 transition-opacity group-hover:opacity-40`} style={{ backgroundColor: glowColor }}></div>
             <div className="flex justify-between items-start mb-4">
-                <div className={`p-2.5 rounded-xl bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors ${color}`}>
-                    <Icon className="w-5 h-5" />
+                <div className={`p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors ${color}`}>
+                    <Icon className="w-8 h-8" />
                 </div>
 
                 <div className="relative">
@@ -74,13 +74,13 @@ const SummaryCard = ({ title, amount, change, icon: Icon, color, glowColor, onHi
                 </div>
             </div>
             <div className="space-y-1 z-10 relative">
-                <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 tracking-wider uppercase">{title}</p>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">${amount}</h3>
+                <p className="text-sm font-bold text-slate-500 dark:text-gray-400 tracking-widest uppercase">{title}</p>
+                <h3 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">${amount}</h3>
                 <div className="flex items-center gap-1.5 pt-1">
-                    <span className={`text-[13px] font-bold ${change.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <span className={`text-base font-bold ${change.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {change}
                     </span>
-                    <span className="text-[11px] text-gray-500 font-medium">from last month</span>
+                    <span className="text-[13px] text-gray-500 font-medium">from last month</span>
                 </div>
             </div>
         </div>
@@ -280,7 +280,7 @@ const Dashboard = () => {
             </div>
 
             {/* Top Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
                 {summaries.map((s, idx) => (
                     <SummaryCard
                         key={idx}
