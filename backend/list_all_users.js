@@ -17,7 +17,7 @@ if (!supabaseUrl || !serviceKey) {
 
 const supabase = createClient(supabaseUrl, serviceKey);
 
-const fs = require('fs');
+import fs from 'fs';
 
 async function listUsers() {
     let output = '';

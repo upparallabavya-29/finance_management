@@ -11,7 +11,6 @@ import budgetRoutes from './routes/budgetRoutes.js';
 import goalRoutes from './routes/goalRoutes.js';
 import billRoutes from './routes/billRoutes.js';
 import debtRoutes from './routes/debtRoutes.js';
-import investmentRoutes from './routes/investmentRoutes.js';
 import insightRoutes from './routes/insightRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import logger from './utils/logger.js';
@@ -60,7 +59,6 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/bills', billRoutes);
 app.use('/api/debts', debtRoutes);
-app.use('/api/investments', investmentRoutes);
 app.use('/api/insights', insightRoutes);
 
 // Serve Static Files from Frontend

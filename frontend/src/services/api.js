@@ -60,12 +60,6 @@ export const debtService = {
     deleteDebt: (id) => api.delete(`/debts/${id}`)
 }
 
-export const investmentService = {
-    getInvestments: () => api.get('/investments'),
-    createInvestment: (data) => api.post('/investments', data),
-    updateInvestment: (id, data) => api.put(`/investments/${id}`, data),
-    deleteInvestment: (id) => api.delete(`/investments/${id}`)
-}
 
 export const insightService = {
     getOverview: () => api.get('/insights')

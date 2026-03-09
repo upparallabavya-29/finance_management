@@ -137,7 +137,7 @@ const Insights = () => {
                     <p className="text-indigo-100 text-lg leading-relaxed">
                         Follow the 50/30/20 rule: Allocate <span className="text-white font-bold underline decoration-indigo-300 underline-offset-4">50% for Needs</span>,
                         <span className="text-white font-bold underline decoration-indigo-300 underline-offset-4 ml-1">30% for Wants</span>, and
-                        <span className="text-white font-bold underline decoration-indigo-300 underline-offset-4 ml-1">20% for Savings & Investments</span>.
+                        <span className="text-white font-bold underline decoration-indigo-300 underline-offset-4 ml-1">20% for Savings</span>.
                         Your current profile suggests optimization in your "Dining" category could boost your monthly savings by 15%.
                     </p>
                     <button className="mt-8 px-8 py-3 bg-white text-indigo-600 rounded-2xl font-black hover:bg-slate-50 transition-colors shadow-xl">

@@ -39,7 +39,6 @@ const Sidebar = ({ onClose }) => {
         { label: 'Goals', path: '/goals', icon: Target },
         { label: 'Bills', path: '/bills', icon: ReceiptText },
         { label: 'Debts', path: '/debts', icon: Landmark },
-        { label: 'Investments', path: '/investments', icon: Briefcase }, // Added Investments item
         { label: 'Settings', path: '/settings', icon: Settings },
     ];
 

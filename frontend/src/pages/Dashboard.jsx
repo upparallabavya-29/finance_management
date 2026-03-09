@@ -20,7 +20,7 @@ import {
     ReceiptText
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { transactionService, budgetService, savingsService, billService, debtService, investmentService } from '../services/api';
+import { transactionService, budgetService, savingsService, billService, debtService } from '../services/api';
 import { supabase } from '../services/supabase';
 
 // Summary Card Component
@@ -131,7 +131,6 @@ const Dashboard = () => {
     const [goals, setGoals] = useState([]);
     const [bills, setBills] = useState([]);
     const [debts, setDebts] = useState([]);
-    const [investments, setInvestments] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
@@ -142,11 +141,10 @@ const Dashboard = () => {
                 budgetService.getBudgets(),
                 savingsService.getGoals(),
                 billService.getBills(),
-                debtService.getDebts(),
-                investmentService.getInvestments()
+                debtService.getDebts()
             ]);
 
-            const [transRes, budgetRes, goalRes, billRes, debtRes, invRes] = results;
+            const [transRes, budgetRes, goalRes, billRes, debtRes] = results;
 
             if (transRes.status === 'fulfilled') setTransactions(transRes.value.data?.data || []);
             else console.error('Error fetching transactions:', transRes.reason);
@@ -164,8 +162,6 @@ const Dashboard = () => {
             if (debtRes.status === 'fulfilled') setDebts(debtRes.value.data?.data || []);
             else console.error('Error fetching debts:', debtRes.reason);
 
-            if (invRes.status === 'fulfilled') setInvestments(invRes.value.data?.data || []);
-            else console.error('Error fetching investments:', invRes.reason);
 
         } catch (error) {
             console.error('Error loading dashboard data:', error);
@@ -182,16 +178,11 @@ const Dashboard = () => {
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
     const netSavings = totalIncome - totalExpenses;
 
-    const totalPortfolioValue = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.current_value || 0)), 0);
-    const totalInvested = investments.reduce((sum, inv) => sum + (parseFloat(inv.quantity || 0) * parseFloat(inv.purchase_price || 0)), 0);
-    const portfolioPL = totalPortfolioValue - totalInvested;
-    const portfolioPLPct = totalInvested > 0 ? ((portfolioPL / totalInvested) * 100).toFixed(1) : '0.0';
 
     const summaries = [
         { title: 'Total Income', amount: totalIncome.toLocaleString(), change: '+0.0%', icon: ArrowUpRight, color: 'text-emerald-400', glowColor: '#10b981' },
         { title: 'Total Expenses', amount: totalExpenses.toLocaleString(), change: '-0.0%', icon: ArrowDownRight, color: 'text-rose-400', glowColor: '#ef4444' },
         { title: 'Net Savings', amount: netSavings.toLocaleString(), change: '+0.0%', icon: Wallet, color: 'text-blue-400', glowColor: '#3b82f6' },
-        { title: 'Portfolio Value', amount: totalPortfolioValue.toLocaleString(), change: `${portfolioPL >= 0 ? '+' : ''}${portfolioPLPct}%`, icon: TrendingUp, color: 'text-purple-400', glowColor: '#8b5cf6' },
     ];
 
     // Compute basic trend purely based on existing transactions
@@ -249,8 +240,7 @@ const Dashboard = () => {
 
     const handleViewDetails = (title) => {
         if (title.includes('Income') || title.includes('Expenses')) navigate('/transactions');
-        else if (title.includes('Savings')) navigate('/goals');
-        else navigate('/investments');
+        else navigate('/transactions');
     };
 
     const handleEditWidget = (title) => {
